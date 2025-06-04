@@ -1,201 +1,136 @@
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+Navari Engine End-User License Agreement (EULA)
 
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+By downloading, cloning, accessing, compiling, or using any part of the 
+Navari Engine & Navari Editor,
+you agree to be bound by the terms of this 
+End-User License Agreement (“Agreement”).
+If you do not agree, you must not access or use the Software.
 
-   1. Definitions.
+Version 1.0 — Effective 2025-06-01
 
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
+Definitions
+“Software” refers to the Navari Engine source code, binaries, build tools, 
+assets, documentation, and associated components provided under this 
+Agreement.
 
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
+“End User” means any individual, corporation, entity, organization, or 
+automated agent that accesses, downloads, clones, compiles, modifies, 
+integrates, or uses the Software, directly or indirectly.
 
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
+“You” refers to the End User accepting this Agreement, 
+either individually or on behalf of an entity.
 
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+“Navari Authors” means the original developers, contributors, and 
+rights holders of the Software.
 
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
+1. License Grant
+Subject to compliance with this Agreement, the Navari Authors 
+grant You a non-exclusive, non-transferable, royalty-free license to:
 
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
+Use, compile, and modify the Software solely for the purpose of developing and distributing games or interactive content.
+Distribute compiled outputs that incorporate the Software, 
+provided that the Software is not redistributed in source or SDK form.
+Redistribution of the Software as a standalone engine, toolkit, or
+development platform requires prior written permission or 
+a commercial license.
 
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
+2. Usage Restrictions
+The Software shall not be used, in whole or in part, for or in connection with:
 
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
+- Gambling, betting, lotteries or real-money games of chance;
+- Pornographic, sexually explicit, or adult entertainment products;
+- Military, defense, surveillance, or weapon-system applications;
+- Development of SDKs, cloud-based platforms, or game engine services;
+- Artificial Intelligence, Machine learning or simulation systems for adversarial, exploitative, or deceptive purposes;
+- Activities prohibited by applicable law, including but not limited to exploitative, unethical, or unauthorized uses.
+- Engaging in any of the above activities constitutes a material breach of this Agreement and 
+results in immediate and permanent termination of all rights under this license.
 
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
+Termination does not affect the ongoing applicability and enforceability of Sections 9 and 10, 
+which shall survive termination indefinitely.
 
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
+3. Commercial Use
+A separate commercial license is required if:
 
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
+- The gross annual revenue from products incorporating the Software exceeds $100,000 USD;
+- The Software is used to develop products for commercial gaming consoles (e.g., PlayStation, Xbox, Nintendo Switch);
+- Platform-as-a-service offerings, cloud SDKs, or engine redistribution.
 
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
+4. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+THE LICENSOR MAKES NO GUARANTEES OF PERFORMANCE, RELIABILITY, OR SECURITY.
+YOU USE THE SOFTWARE ENTIRELY AT YOUR OWN RISK.
 
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
+5. Patent License
+Contributors to the Software grant You a perpetual, worldwide, 
+royalty-free patent license to make, use, sell, and 
+distribute their contributions, provided that:
 
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
+This license is automatically and irrevocably terminated if You initiate or 
+participate in any patent litigation or claim against any contributor or against the Software itself.
+This clause is modeled after Section 3 of the Apache License 2.0.
 
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
+6. Export and Sanctions Compliance
+You shall not use, export, re-export, transfer, or provide the Software in violation of:
 
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
+- U.S. Export Administration Regulations (EAR);
+- International Traffic in Arms Regulations (ITAR);
+- EU or UN dual-use export controls;
+- OFAC, BIS, or other sanctions laws or embargoes;
+- Any jurisdiction's laws governing the export of software, cryptographic tools, or defense-related items.
 
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
+You bear sole responsibility for ensuring compliance with 
+applicable export laws.
 
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
+7. Trademarks and Attribution
+You may use the phrase “Powered by Navari” in product credits or promotional materials.
 
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
+You may not use the “Navari” name, logo, or branding in your company, 
+product, or domain name without express written permission. 
+No endorsement is implied by use of the Software.
 
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
+8. Termination
+This license terminates automatically and without notice if:
 
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
+- You breach any term of this Agreement;
+- You use the Software for a restricted purpose in violation of Section 2;
+- You fail to obtain a commercial license when required under Section 3;
+- You initiate patent litigation contrary to Section 5;
+- You violate applicable export or sanctions regulations.
 
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
+Upon termination, all rights granted herein cease immediately and 
+you must destroy all copies of the Software.
 
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
+Sections 9 and 10 survive any termination, expiration, or revocation of
+this license and remain fully binding.
 
-   END OF TERMS AND CONDITIONS
+9. Disclaimer of Liability
+The Software is provided "AS IS,” without warranty of any kind, express or 
+implied, including but not limited to warranties of merchantability, 
+fitness for a particular purpose, title, and non-infringement.
 
-   APPENDIX: How to apply the Apache License to your work.
+Under no circumstances shall the Navari Authors be held liable to You or 
+any third party for any form of damages, including:
 
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
+Direct, indirect, incidental, special, punitive, or consequential damages;
+- Loss of profits, revenue, data, goodwill, or business opportunities;
+- System failures, security breaches, or exploitations;
+- Claims or actions arising from regulatory, legal, or governmental proceedings.
+- Legal or regulatory violations caused by your product
+- Any use of the Software in abusive, exploitative, unlawful, or unintended way
 
-   Copyright [yyyy] [name of copyright owner]
+You accept full and sole responsibility for all outcomes arising from 
+your use of the Software. 
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+This limitation of liability applies under all legal theories and jurisdictions and remains in force, even after termination of this Agreement.
 
-       http://www.apache.org/licenses/LICENSE-2.0
+10. Waiver of Legal Recourse
+You irrevocably and unconditionally waive any right to seek:
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+- Damages, equitable relief, or injunctive relief;
+- Arbitration, litigation, or administrative action;
+- Any legal or quasi-legal remedy against the Navari Authors.
+
+This waiver is binding in all jurisdictions and survives termination, breach, or expiration of this Agreement.
+
+© 2025 Navari Authors. All rights reserved.
