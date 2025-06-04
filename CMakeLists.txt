@@ -3,8 +3,8 @@ project(stratengine)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-set(STRATENGINE_VER "0.0.9")
-message( STATUS "Stratengine v${STRATENGINE_VER}")
+set(NAVARI__VER "0.0.9")
+message( STATUS "Stratengine v${NAVARI__VER}")
 message( STATUS "-----------------------------")
 
 set(SDL_SHARED OFF)
@@ -46,7 +46,7 @@ NV_DETECT_IS_ROOT_PROJECT(ISROOT)
 
 if(ISROOT)
   if(NOT STX_CXX_VERSION)
-    set(STX_CXX_VERSION 17)
+    set(STX_CXX_VERSION 20)
   endif()
     option(STX_CXX_STANDARD_REQUIRED "CXX Required" ON)
     option(STX_CXX_EXTENSIONS "CXX Extensions" OFF)
@@ -109,31 +109,31 @@ add_subdirectory(thirdparty/vma build-vma)
 #add vk-bootstrap
 add_subdirectory(thirdparty/vk-bootstrap build-vk-bootstrap)
 
-#add imgui
-add_subdirectory(build-script/imgui build-imgui)
+# #add imgui
+# add_subdirectory(build-script/imgui build-imgui)
 
-#add GLFW
-add_subdirectory(thirdparty/glfw build-glfw)
+# #add GLFW
+# add_subdirectory(thirdparty/glfw build-glfw)
 
-#add GLM
-add_subdirectory(thirdparty/glm build-glm)
+# #add GLM
+# add_subdirectory(thirdparty/glm build-glm)
 
-#add Assimp
-add_subdirectory(thirdparty/assimp build-assimp)
+# #add Assimp
+# add_subdirectory(thirdparty/assimp build-assimp)
 
-#add Meshoptimizer
-add_subdirectory(thirdparty/meshoptimizer build-meshoptimizer)
+# #add Meshoptimizer
+# add_subdirectory(thirdparty/meshoptimizer build-meshoptimizer)
 
-#add fastgltf
-add_subdirectory(thirdparty/fastgltf build-fastgltf)
+# #add fastgltf
+# add_subdirectory(thirdparty/fastgltf build-fastgltf)
 
-#add entt
-add_subdirectory(thirdparty/entt build-entt)
+# #add entt
+# add_subdirectory(thirdparty/entt build-entt)
 
 
 # Include directories
 add_subdirectory(engine build-engine)
-add_subdirectory(editor build-editor)
+# add_subdirectory(editor build-editor)
 
 
 

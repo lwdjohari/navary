@@ -26,8 +26,8 @@
 #include "stratengine/macro.h"
 
 // cppcheck-suppress unknownMacro
-STRATE_INNER_NAMESPACE(utility)
-STRATE_MAKE_NAMESPACE(random)
+NVR_INNER_NAMESPACE(utility)
+NVR_MAKE_NAMESPACE(random)
 
 // Template for random number generation with user-specified min and max
 template <typename T>
@@ -79,5 +79,5 @@ static inline int64_t RandomizeInt64t() {
   return Randomize<int64_t>(min, max);
 }
 
-STRATE_END_NAMESPACE
-STRATE_INNER_END_NAMESPACE
+NVR_END_NAMESPACE
+NVR_INNER_END_NAMESPACE

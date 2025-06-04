@@ -16,7 +16,7 @@ set(IMGUI_BACKEND_VULKAN_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/imgui-docked//backends/imgui_impl_vulkan.cpp
 )
 
-if(STRATE_USE_WGPU)
+if(NVR_USE_WGPU)
 set(IMGUI_BACKEND_WGPU_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/imgui-docked/backends/imgui_impl_wgpu.cpp
 )

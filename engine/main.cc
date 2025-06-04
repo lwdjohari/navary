@@ -1,19 +1,19 @@
 #include <cstring>
 #include <iostream>
 
-#include "stratengine/stratengine.h"
+#include "navari/navari.h"
 
 int main(int argc, char* argv[]) {
-  using namespace stratengine;
+  using namespace navari;
 
-  platform::StratEngineApp app;
+  platform::NavariApp app;
   platform::RenderedBackend rendered_backend;
   platform::LinuxDisplayType linux_display_type;
   material::graph::constants::Constant1Vector cv;
 
 // Auto Determine what best rendered in linux, windows, osx, android & ios and
 // the fallback
-#if STRATE_PLATFORM_LINUX == 1
+#if NVR_PLATFORM_LINUX == 1
   // rendered_backend = platform::DetermineRenderedBackend(
   //     platform::RenderedBackend::kVulkan,
   //     platform::RenderedBackend::kOpenGL);
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
 #endif
 
-#if STRATE_PLATFORM_WINDOWS == 1
+#if NVR_PLATFORM_WINDOWS == 1
   rendered_backend = platform::DetermineRenderedBackend(
       platform::RenderedBackend::kDirect3D12,
       platform::RenderedBackend::kDirect3D11);
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
 #endif
 
-#if STRATE_PLATFORM_ANDROID == 1
+#if NVR_PLATFORM_ANDROID == 1
   rendered_backend = platform::DetermineRenderedBackend(
       platform::RenderedBackend::kOpenGLES, platform::RenderedBackend::kOpenGL);
 #endif
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
       app.InitApp(platform::RenderedBackend::kOpenGL, "Hello-Stratengine",
                   linux_display_type == platform::LinuxDisplayType::kWayland);
 
-  if (res != platform::StratEngineAppResult::kOk) {
+  if (res != platform::NavariAppResult::kOk) {
     std::cerr << "Failed to create Vulkan based engine" << std::endl;
   }
 

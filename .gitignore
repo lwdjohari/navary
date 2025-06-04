@@ -32,6 +32,8 @@
 *.app
 
 build/
+.vscode/
+local/
 thirdparty/bgfx-cmake/bgfx/examples/
 thirdparty/bgfx-cmake/bgfx/examples/runtime/shaders/
 thirdparty/bgfx-cmake/
