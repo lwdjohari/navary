@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: NAVARI EULA 1.0
+// SPDX-License-Identifier: NAVARY EULA 1.0
 // Author: Linggawasistha Djohari
 // Bump-pointer slab-based Arena Allocator
 
-#include "navari/memory/arena_allocator.h"
+#include "navary/memory/arena_allocator.h"
 
 NVR_INNER_NAMESPACE(memory)
 

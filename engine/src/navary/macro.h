@@ -1,6 +1,6 @@
 #pragma once
 
-#define NVR_NAMESPACE namespace navari
+#define NVR_NAMESPACE namespace navary
 #define NVR_BEGIN_NAMESPACE NVR_NAMESPACE {
 #define NVR_MAKE_NAMESPACE(arg) namespace arg {
 #define NVR_END_NAMESPACE }
@@ -513,14 +513,14 @@ static_assert(false, "\n\n"
     return os << static_cast<typename std::underlying_type<E>::type>(e); \
   }
 
-namespace navari {
+namespace navary {
 namespace impl {
 template <typename Enum, typename Lambda>
 std::string enum_to_string_impl(Enum e, Lambda lambda) {
   return lambda(e);
 }
 }  // namespace impl
-}  // namespace navari
+}  // namespace navary
 
 #define NVR_ENUM_CLASS_TO_STRING_FORMATTER(EnumType, ...)         \
                                                                      \
@@ -532,5 +532,5 @@ std::string enum_to_string_impl(Enum e, Lambda lambda) {
           throw std::invalid_argument("Unsupported enum value");     \
       }                                                              \
     };                                                               \
-    return navari::impl::enum_to_string_impl(e, toStringFunc);  \
+    return navary::impl::enum_to_string_impl(e, toStringFunc);  \
   }

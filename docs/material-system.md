@@ -1,5 +1,5 @@
-# Stratengine Material System
-Stratengine develop to bring nostalgic feeling of Legacy Material System look and feel.
+# Navary Material System
+Navary develop to bring nostalgic feeling of Legacy Material System look and feel.
 All features are still in experimental mode and WIP.
 
 ## 1. Shader Effect and Pass Management
@@ -41,7 +41,6 @@ Supports multiple material layers with dynamic blending.
 
 ## 6. Dynamic Lighting Enhancements
 
-- Screen-Space Reflections (SSR): Can be enabled or disabled.
 - Dynamic Shadow Mapping: Can be enabled or disabled.
 
 ## 7. Material Caching
@@ -56,4 +55,3 @@ Supports multiple material layers with dynamic blending.
 
 ## 9. Shader Compatibility
 
-- Uses BGFX shader language for cross-platform compatibility, supporting Vulkan, OpenGL, GLES, Metal, WebGL, and DirectX.

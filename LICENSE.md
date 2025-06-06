@@ -1,6 +1,6 @@
-# Navari Engine End-User License Agreement (EULA)
+# Navary Engine End-User License Agreement (EULA)
 
-> By downloading, cloning, accessing, compiling, or using any part of the Navari Engine & Navari Editor,  
+> By downloading, cloning, accessing, compiling, or using any part of the Navary Engine & Navary Editor,  
 > you agree to be bound by the terms of this End-User License Agreement (“Agreement”).  
 > If you do not agree, you must not access or use the Software.
 
@@ -10,19 +10,19 @@
 
 ## Definitions
 
-**“Software”** refers to the Navari Engine source code, binaries, build tools, assets, documentation, and associated components provided under this Agreement.
+**“Software”** refers to the Navary Engine source code, binaries, build tools, assets, documentation, and associated components provided under this Agreement.
 
 **“End User”** means any individual, corporation, entity, organization, or automated agent that accesses, downloads, clones, compiles, modifies, integrates, or uses the Software, directly or indirectly.
 
 **“You”** refers to the End User accepting this Agreement, either individually or on behalf of an entity.
 
-**“Navari Authors”** means the original developers, contributors, and rights holders of the Software.
+**“Navary Authors”** means the original developers, contributors, and rights holders of the Software.
 
 ---
 
 ## 1. License Grant
 
-Subject to compliance with this Agreement, the Navari Authors grant You a non-exclusive, non-transferable, royalty-free license to:
+Subject to compliance with this Agreement, the Navary Authors grant You a non-exclusive, non-transferable, royalty-free license to:
 
 - Use, compile, and modify the Software solely for the purpose of developing and distributing games or interactive content.
 - Distribute compiled outputs that incorporate the Software, provided that the Software is not redistributed in source or SDK form.
@@ -90,9 +90,9 @@ You bear sole responsibility for ensuring compliance with applicable export laws
 
 ## 7. Trademarks and Attribution
 
-You may use the phrase “Powered by Navari” in product credits or promotional materials.
+You may use the phrase “Powered by Navary” in product credits or promotional materials.
 
-You may not use the “Navari” name, logo, or branding in your company, product, or domain name without express written permission. No endorsement is implied by use of the Software.
+You may not use the “Navary” name, logo, or branding in your company, product, or domain name without express written permission. No endorsement is implied by use of the Software.
 
 ---
 
@@ -116,7 +116,7 @@ Sections 9 and 10 survive any termination, expiration, or revocation of this lic
 
 The Software is provided "AS IS,” without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, title, and non-infringement.
 
-Under no circumstances shall the Navari Authors be held liable to You or any third party for any form of damages, including:
+Under no circumstances shall the Navary Authors be held liable to You or any third party for any form of damages, including:
 
 - Direct, indirect, incidental, special, punitive, or consequential damages;
 - Loss of profits, revenue, data, goodwill, or business opportunities;
@@ -136,10 +136,10 @@ You irrevocably and unconditionally waive any right to seek:
 
 - Damages, equitable relief, or injunctive relief;
 - Arbitration, litigation, or administrative action;
-- Any legal or quasi-legal remedy against the Navari Authors.
+- Any legal or quasi-legal remedy against the Navary Authors.
 
 This waiver is binding in all jurisdictions and survives termination, breach, or expiration of this Agreement.
 
 ---
 
-© 2025 Navari Authors. All rights reserved.
+© 2025 Navary Authors. All rights reserved.

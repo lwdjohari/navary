@@ -1,0 +1,39 @@
+graph TD
+  A[Main Thread] --> B[Poll Input]
+  B --> C[Update Clocks]
+  C --> D[Accumulate Time]
+  D --> E{Enough time for fixed step?}
+  E -->|Yes| F[Dispatch Job Graph]
+  F --> G[Simulation Stage]
+  G --> G1[ECS Logic]
+  G --> G2[Physics]
+  G --> G3[Animation]
+  G --> H[Join All Jobs]
+  H --> I[Interpolate Transforms]
+  I --> J[Culling & LOD Selection]
+  J --> K[Sort & Batch Drawables]
+  K --> L[Build RenderGraph (Fixed Layout)]
+  L --> M[Submit to Render Thread]
+
+  M --> N[Render Thread]
+  N --> N1[Begin Frame]
+  N1 --> N2[Execute Passes]
+  N2 --> N3[BasePass -> Lighting -> PostFX -> UIOverlay]
+  N3 --> N4[Submit GPU Command Buffer]
+  N4 --> N5[Present Swapchain Frame]
+
+  A1[Asset Thread] --> A2[Stream Meshes, Textures]
+  A1 --> A3[Decompress & Upload GPU Buffers]
+
+  B1[Audio Thread (Optional)] --> B2[Mix Buffers]
+  B2 --> B3[Submit to Audio HAL]
+
+  QoS[Frame QoS Monitor] --> D
+  QoS --> L
+  QoS --> N2
+
+  T[Timing System]
+  T --> C
+  T --> D
+  T --> QoS
+  T --> N4

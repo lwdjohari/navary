@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: NAVARI EULA 1.0
+// SPDX-License-Identifier: NAVARY EULA 1.0
 // Author: Linggawasistha Djohari
 // Slab-block for Arena Allocator
 
@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include "navari/macro.h"
+#include "navary/macro.h"
 
 NVR_INNER_NAMESPACE(memory)
 

@@ -3,8 +3,8 @@ project(stratengine)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-set(NAVARI__VER "0.0.9")
-message( STATUS "Stratengine v${NAVARI__VER}")
+set(NAVARY__VER "0.0.9")
+message( STATUS "Navary v${NAVARY__VER}")
 message( STATUS "-----------------------------")
 
 set(SDL_SHARED OFF)
@@ -62,13 +62,13 @@ endif()
 
 message(STATUS "")
 
-message(STATUS "Stratengine LIB DIR:${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "Navary LIB DIR:${CMAKE_CURRENT_SOURCE_DIR}")
 
 
 include(ProjectCXX)
 set(ISROOT FALSE)
 NV_DETECT_IS_ROOT_PROJECT(ISROOT)
-message(STATUS "Stratengine Root Project: ${ISROOT} ${STX_CXX_VERSION}")
+message(STATUS "Navary Root Project: ${ISROOT} ${STX_CXX_VERSION}")
 
 NV_GET_CXX_STD_FEATURE(${STX_CXX_VERSION} CXX_FEATURE)
 message(STATUS "CXX Feature: ${CXX_FEATURE}")
