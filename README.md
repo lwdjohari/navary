@@ -1,2 +1,2 @@
-# stratengine
-Experimental C++ crossplatform game engine
+# Navary Engine
+Experimental C++ mobile-centric crossplatform game engine
