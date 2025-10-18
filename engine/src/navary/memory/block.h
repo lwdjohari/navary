@@ -27,16 +27,19 @@ struct Block {
       return nullptr;
 
     uintptr_t raw_int = reinterpret_cast<uintptr_t>(raw);
+
     // Round up `raw_int` to a multiple of `alignment`:
     uintptr_t aligned = (raw_int + (alignment - 1)) & ~(alignment - 1);
-    uint8_t* base = reinterpret_cast<uint8_t*>(aligned);
-    Block* b = reinterpret_cast<Block*>(base);
+    uint8_t* base     = reinterpret_cast<uint8_t*>(aligned);
+    Block* b          = reinterpret_cast<Block*>(base);
+
     // We’ll store the Block struct at the beginning:
     // [ Block header ][ usable bytes ... ]
     // So skip past the header for the bump pointer:
     b->base = base;
-    b->ptr = base + sizeof(Block);
-    b->end = base + sizeof(Block) + block_size;
+    b->ptr  = base + sizeof(Block);
+    b->end  = base + sizeof(Block) + block_size;
+
     return b;
   }
 
@@ -55,11 +58,13 @@ struct Block {
   // Returns pointer on success, or nullptr if not enough room.
   void* AllocateInBlock(size_t n) {
     uint8_t* current = ptr;
-    uint8_t* next = current + n;
+    uint8_t* next    = current + n;
+
     if (next <= end) {
       ptr = next;
       return current;
     }
+
     return nullptr;
   }
 

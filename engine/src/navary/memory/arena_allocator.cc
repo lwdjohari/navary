@@ -6,11 +6,10 @@
 
 NVR_INNER_NAMESPACE(memory)
 
-Arena::Arena(size_t initialBlockSize = 16 * 1024,
-             size_t alignment = alignof(std::max_align_t))
-                : alignment_(alignment),
-                  initial_size_(initialBlockSize),
-                  current_block_size_(initialBlockSize) {
+Arena::Arena(size_t initialBlockSize, size_t alignment)
+    : alignment_(alignment),
+      initial_size_(initialBlockSize),
+      current_block_size_(initialBlockSize) {
   // Allocate the first block:
   Block* block = Block::Create(initialBlockSize, alignment_);
   //   assert(block && "Out of memory when creating first block");
@@ -37,8 +36,8 @@ void Arena::Reset() {
 
   // Reset counters to match a single block
   current_block_size_ = initial_size_;
-  used_bytes_ = 0;
-  committed_bytes_ = blocks_[0]->TotalCapacity();
+  used_bytes_         = 0;
+  committed_bytes_    = blocks_[0]->TotalCapacity();
 }
 
 void* Arena::Allocate(size_t n, ArenaErrCode& err) {

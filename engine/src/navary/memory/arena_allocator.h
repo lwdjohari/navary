@@ -5,18 +5,18 @@
 #include <cstddef>
 #include <vector>
 
-#include "macro.h"
+#include "navary/macro.h"
 #include "navary/memory/block.h"
 
 NVR_INNER_NAMESPACE(memory)
 using ArenaErrCode = int32_t;
 
 namespace ARENA_ERR {
-static constexpr ArenaErrCode OK = 0;
-static constexpr ArenaErrCode ARENA_ERR_OVERRUN = 1;
-static constexpr ArenaErrCode ARENA_ERR_OOM = 2;
-static constexpr ArenaErrCode ARENA_ERR_GROW = 3;
-static constexpr ArenaErrCode ARENA_ERR_ALIGNMENT = 4;
+static constexpr ArenaErrCode OK                   = 0;
+static constexpr ArenaErrCode ARENA_ERR_OVERRUN    = 1;
+static constexpr ArenaErrCode ARENA_ERR_OOM        = 2;
+static constexpr ArenaErrCode ARENA_ERR_GROW       = 3;
+static constexpr ArenaErrCode ARENA_ERR_ALIGNMENT  = 4;
 static constexpr ArenaErrCode ARENA_ERR_ALLOCATION = 5;
 
 }  // namespace ARENA_ERR
@@ -28,10 +28,10 @@ class Arena {
   // initial_size_: how big the first block should be (in bytes).
   // alignment:  alignment for both block base and allocations.
   Arena(size_t initial_block_size = 16 * 1024,
-        size_t alignment = alignof(std::max_align_t));
+        size_t alignment          = alignof(std::max_align_t));
 
   // Disallow copy
-  Arena(const Arena&) = delete;
+  Arena(const Arena&)            = delete;
   Arena& operator=(const Arena&) = delete;
   ~Arena();
 
@@ -54,9 +54,9 @@ class Arena {
   size_t alignment_;
   size_t initial_size_;        // first block size
   size_t current_block_size_;  // doubled each time, up to max
-   // Running counters
-  size_t used_bytes_;      // sum of all bytes handed out
-  size_t committed_bytes_; // sum of all block capacities
+                               // Running counters
+  size_t used_bytes_;          // sum of all bytes handed out
+  size_t committed_bytes_;     // sum of all block capacities
 
   std::vector<Block*> blocks_;  // all allocated blocks, in order
 

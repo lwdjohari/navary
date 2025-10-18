@@ -32,8 +32,7 @@ NVR_MAKE_NAMESPACE(random)
 // Template for random number generation with user-specified min and max
 template <typename T>
 static inline T Randomize(T min, T max) {
-  std::default_random_engine generator(
-      std::chrono::system_clock::now().time_since_epoch().count());
+  std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
   std::uniform_int_distribution<T> distribution(min, max);
   return distribution(generator);
 }
