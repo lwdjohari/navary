@@ -68,3 +68,7 @@
 	path = thirdparty/concurrentqueue
 	url = https://github.com/cameron314/concurrentqueue.git
 	shallow = true
+[submodule "thirdparty/enkits"]
+	path = thirdparty/enkits
+	url = https://github.com/dougbinks/enkiTS.git
+	shallow = true
