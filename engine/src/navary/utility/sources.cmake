@@ -1,3 +1,0 @@
-set(NAVARY_UTILITY_SRC
-    ${CMAKE_CURRENT_LIST_DIR}/random.h
-)
