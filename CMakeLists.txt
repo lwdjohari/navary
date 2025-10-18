@@ -120,6 +120,7 @@ add_library(entt::entt ALIAS entt)
 
 
 # Include directories
+add_subdirectory(examples/vulkan-hello-world build-vulkan-hello-world)
 add_subdirectory(engine build-engine)
 # add_subdirectory(editor build-editor)
 
