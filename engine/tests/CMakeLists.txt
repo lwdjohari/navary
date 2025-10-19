@@ -12,7 +12,8 @@ add_executable(navary-engine-test
   math/vec4_test.cc
   math/rect_test.cc
   math/fixed_test.cc
-
+  math/math_util_test.cc
+  math/plane_test.cc
 )
 
 # target_include_directories(block_tests PRIVATE
