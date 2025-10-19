@@ -4,7 +4,9 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
+#include <cmath>
 
+#include "navary/math/math_util.h"
 namespace navary::math {
 
 #if !defined(NDEBUG)
@@ -28,6 +30,14 @@ namespace navary::math {
  *   - Multiplying two Fixed uses widened arithmetic, then scales back.
  *   - Floating overloads for operators are intentionally not provided
  *     to avoid implicit float mixing causes nondeterministic behavior.
+ *
+ *  Usage guidance (so the team doesn’t get confused)
+ *   - High-level gameplay/AI code: prefer operators (a*b, a/b) for clarity.
+ *   - Low-level math / numerics code: prefer the named helpers when you want to
+ *     be explicit about intent (e.g., MulDiv(v, n, d) makes the scale crystal
+ *     clear).
+ *   - Networking / replay-critical code: either is fine since they’re
+ *     identical under the hood; just be consistent within a subsystem.
  */
 template <typename Rep, int kFracBits>
 class Fixed final {
@@ -79,6 +89,10 @@ class Fixed final {
     return FromRaw(RoundAwayFromZero<Rep>(scaled));
   }
 
+  static constexpr Fixed FromDegree(double deg) noexcept {
+    return FromDouble(deg * (navary::math::kPi / 180.0));
+  }
+
   // Constants
   static constexpr Fixed Zero() {
     return FromRaw(0);
@@ -96,7 +110,7 @@ class Fixed final {
   float ToFloat() const {
     return static_cast<float>(raw_) / static_cast<float>(kOneRaw);
   }
-  
+
   double ToDouble() const {
     return static_cast<double>(raw_) / static_cast<double>(kOneRaw);
   }
@@ -166,6 +180,7 @@ class Fixed final {
 #endif
     return FromRaw(static_cast<Rep>(a.raw_ - b.raw_));
   }
+
   constexpr Fixed& operator+=(Fixed v) {
     *this = *this + v;
     return *this;
@@ -307,6 +322,42 @@ class Fixed final {
   constexpr bool IsZero() const {
     return raw_ == 0;
   }
+
+  // -------------------------------
+  // Adding new overloading operator to handle high level usage on
+  // fixed_vec2.h, fixed_vec3.h, fixed_trigonometry.h
+
+  // Usage guidance (so the team doesn’t get confused)
+  // - High-level gameplay/AI code: prefer operators (a*b, a/b) for clarity.
+  // - Low-level math / numerics code: prefer the named helpers when you want to
+  //   be explicit about intent (e.g., MulDiv(v, n, d) makes the scale crystal
+  //   clear).
+  // - Networking / replay-critical code: either is fine since they’re
+  //   identical under the hood; just be consistent within a subsystem.
+
+  // Multiply: round-to-nearest via Mul()
+  friend constexpr Fixed operator*(Fixed a, Fixed b) {
+    return Mul(a, b);
+  }
+
+  // Divide: round-to-nearest via MulDiv(a, 1, b)
+  friend constexpr Fixed operator/(Fixed a, Fixed b) {
+    // Option A: use a shifted divide with explicit rounding
+    // (but better: keep single-point policy -> delegate)
+    return MulDiv(a, Fixed::FromInt(1), b);
+  }
+
+  // Optional: modulus; choose semantics intentionally.
+  // If your Mod() is mathematical modulus, wire it here:
+  friend constexpr Fixed operator%(Fixed a, Fixed b) {
+    return Mod(a, b);  // documented as modulus
+  }
+
+  friend constexpr Fixed operator*(int b, Fixed a) {
+    return a * b;
+  }
+
+  // -------------------------------
 
   // Intentionally delete float operator overloads to avoid accidental
   // promotion.
