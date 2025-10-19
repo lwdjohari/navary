@@ -32,6 +32,7 @@ set(NAVARY_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec3.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec4.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/rect.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/plane.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.cc
 
 )
@@ -42,7 +43,13 @@ set(NAVARY_ENGINE_SOURCES
 set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/macro.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/size2.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec2.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec3.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec4.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/rect.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/fixed.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/math_util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/plane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/block.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena_allocator.h
