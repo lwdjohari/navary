@@ -5,6 +5,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 set(NAVARY__VER "0.0.9")
 
+option(NAVARY_ENGINE_BUILD_TEST "Build the Catch2 Unit Test for navary::engine" ON)
+
 set(SDL_SHARED OFF)
 set(SDL2_DISABLE_INSTALL ON)
 set(BUILD_SHARED_LIBS OFF)

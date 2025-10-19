@@ -81,6 +81,7 @@ target_link_libraries(${PROJECT_NAME}-runner PUBLIC navary::engine)
 set_target_properties(${PROJECT_NAME}-runner PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_features(${PROJECT_NAME}-runner PUBLIC ${CXX_FEATURE})
 
-
-
-add_subdirectory(tests build-engine-tests)
+if(NAVARY_ENGINE_BUILD_TEST)
+     message(STATUS "Navary Engine tests enabled (NAVARY_ENGINE_BUILD_TEST=ON)")
+    add_subdirectory(tests build-engine-tests)
+endif()
