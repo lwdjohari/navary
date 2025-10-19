@@ -36,7 +36,7 @@ static ResultOrRC<int> Add(std::string_view a, std::string_view b) {
   return static_cast<int>(s);
 }
 
-TEST_CASE("NAV_* macros short-circuit and propagate", "[macros]") {
+TEST_CASE("NVR_* macros short-circuit and propagate", "[macros]") {
   auto r1 = Add("12", "30");
   REQUIRE(r1.ok());
   REQUIRE(r1.value() == 42);
