@@ -73,7 +73,8 @@
 #if defined(__clang__)
 // clang defines __GNUC__ or _MSC_VER
 #undef NVR_COMPILER_CLANG
-#define NVR_COMPILER_CLANG (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
+#define NVR_COMPILER_CLANG \
+  (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 #if defined(__clang_analyzer__)
 #undef NVR_COMPILER_CLANG_ANALYZER
 #define NVR_COMPILER_CLANG_ANALYZER 1
@@ -83,7 +84,8 @@
 #define NVR_COMPILER_MSVC _MSC_VER
 #elif defined(__GNUC__)
 #undef NVR_COMPILER_GCC
-#define NVR_COMPILER_GCC (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#define NVR_COMPILER_GCC \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #else
 #error "NVR_COMPILER_* is not defined!"
 #endif  //
@@ -105,7 +107,8 @@
 #undef NVR_CPU_RISCV
 #define NVR_CPU_RISCV 1
 #define NVR_CACHE_LINE_SIZE 64
-#elif defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
+#elif defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || \
+    defined(__x86_64__)
 #undef NVR_CPU_X86
 #define NVR_CPU_X86 1
 #define NVR_CACHE_LINE_SIZE 64
@@ -115,8 +118,9 @@
 #define NVR_CACHE_LINE_SIZE 64
 #endif  //
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__) || defined(__64BIT__) || \
-    defined(__mips64) || defined(__powerpc64__) || defined(__ppc64__) || defined(__LP64__)
+#if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__) ||    \
+    defined(__64BIT__) || defined(__mips64) || defined(__powerpc64__) || \
+    defined(__ppc64__) || defined(__LP64__)
 #undef NVR_ARCH_64BIT
 #define NVR_ARCH_64BIT 64
 #else
@@ -187,7 +191,8 @@
     defined(__ENVIRONMENT_TV_OS_VERSION_MIN_REQUIRED__)
 #undef NVR_PLATFORM_IOS
 #define NVR_PLATFORM_IOS 1
-#elif defined(__has_builtin) && __has_builtin(__is_target_os) && __is_target_os(xros)
+#elif defined(__has_builtin) && __has_builtin(__is_target_os) && \
+    __is_target_os(xros)
 #undef NVR_PLATFORM_VISIONOS
 #define NVR_PLATFORM_VISIONOS 1
 #elif defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
@@ -196,16 +201,17 @@
 #elif defined(__EMSCRIPTEN__)
 #include <emscripten/version.h>
 #undef NVR_PLATFORM_WEBGL
-#define NVR_PLATFORM_WEBGL \
-  (__EMSCRIPTEN_major__ * 10000 + __EMSCRIPTEN_minor__ * 100 + __EMSCRIPTEN_tiny__)
+#define NVR_PLATFORM_WEBGL                                     \
+  (__EMSCRIPTEN_major__ * 10000 + __EMSCRIPTEN_minor__ * 100 + \
+   __EMSCRIPTEN_tiny__)
 #elif defined(__ORBIS__)
 #undef NVR_PLATFORM_PS4
 #define NVR_PLATFORM_PS4 1
 #elif defined(__PROSPERO__)
 #undef NVR_PLATFORM_PS5
 #define NVR_PLATFORM_PS5 1
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || \
-    defined(__OpenBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || \
+    defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 #undef NVR_PLATFORM_BSD
 #define NVR_PLATFORM_BSD 1
 #elif defined(__GNU__)
@@ -233,8 +239,8 @@
 #elif defined(__MINGW32__) || defined(__MINGW64__)
 #undef NVR_CRT_MINGW
 #define NVR_CRT_MINGW 1
-#elif defined(__apple_build_version__) || defined(__ORBIS__) || defined(__EMSCRIPTEN__) || \
-    defined(__llvm__) || defined(__HAIKU__)
+#elif defined(__apple_build_version__) || defined(__ORBIS__) || \
+    defined(__EMSCRIPTEN__) || defined(__llvm__) || defined(__HAIKU__)
 #undef NVR_CRT_LIBCXX
 #define NVR_CRT_LIBCXX 1
 #elif NVR_PLATFORM_BSD
@@ -242,36 +248,39 @@
 #define NVR_CRT_BSD 1
 #endif  //
 
-#if !NVR_CRT_BIONIC && !NVR_CRT_BSD && !NVR_CRT_GLIBC && !NVR_CRT_LIBCXX && !NVR_CRT_MINGW && \
-    !NVR_CRT_MSVC && !NVR_CRT_NEWLIB
+#if !NVR_CRT_BIONIC && !NVR_CRT_BSD && !NVR_CRT_GLIBC && !NVR_CRT_LIBCXX && \
+    !NVR_CRT_MINGW && !NVR_CRT_MSVC && !NVR_CRT_NEWLIB
 #undef NVR_CRT_NONE
 #define NVR_CRT_NONE 1
 #endif  // NVR_CRT_*
 #endif  // !NVR_CRT_NONE
 
 ///
-#define NVR_PLATFORM_POSIX                                                                      \
-  (0 || NVR_PLATFORM_ANDROID || NVR_PLATFORM_BSD || NVR_PLATFORM_WEBGL || NVR_PLATFORM_HAIKU || \
-   NVR_PLATFORM_HURD || NVR_PLATFORM_IOS || NVR_PLATFORM_LINUX || NVR_PLATFORM_NX ||            \
-   NVR_PLATFORM_OSX || NVR_PLATFORM_PS4 || NVR_PLATFORM_PS5 || NVR_PLATFORM_RPI ||              \
+#define NVR_PLATFORM_POSIX                                                \
+  (0 || NVR_PLATFORM_ANDROID || NVR_PLATFORM_BSD || NVR_PLATFORM_WEBGL || \
+   NVR_PLATFORM_HAIKU || NVR_PLATFORM_HURD || NVR_PLATFORM_IOS ||         \
+   NVR_PLATFORM_LINUX || NVR_PLATFORM_NX || NVR_PLATFORM_OSX ||           \
+   NVR_PLATFORM_PS4 || NVR_PLATFORM_PS5 || NVR_PLATFORM_RPI ||            \
    NVR_PLATFORM_VISIONOS)
 
 ///
-#define NVR_PLATFORM_NONE                                                                        \
-  !(0 || NVR_PLATFORM_ANDROID || NVR_PLATFORM_BSD || NVR_PLATFORM_WEBGL || NVR_PLATFORM_HAIKU || \
-    NVR_PLATFORM_HURD || NVR_PLATFORM_IOS || NVR_PLATFORM_LINUX || NVR_PLATFORM_NX ||            \
-    NVR_PLATFORM_OSX || NVR_PLATFORM_PS4 || NVR_PLATFORM_PS5 || NVR_PLATFORM_RPI ||              \
-    NVR_PLATFORM_VISIONOS || NVR_PLATFORM_WINDOWS || NVR_PLATFORM_WINRT || NVR_PLATFORM_XBOXONE)
+#define NVR_PLATFORM_NONE                                                  \
+  !(0 || NVR_PLATFORM_ANDROID || NVR_PLATFORM_BSD || NVR_PLATFORM_WEBGL || \
+    NVR_PLATFORM_HAIKU || NVR_PLATFORM_HURD || NVR_PLATFORM_IOS ||         \
+    NVR_PLATFORM_LINUX || NVR_PLATFORM_NX || NVR_PLATFORM_OSX ||           \
+    NVR_PLATFORM_PS4 || NVR_PLATFORM_PS5 || NVR_PLATFORM_RPI ||            \
+    NVR_PLATFORM_VISIONOS || NVR_PLATFORM_WINDOWS || NVR_PLATFORM_WINRT || \
+    NVR_PLATFORM_XBOXONE)
 
 ///
-#define NVR_PLATFORM_OS_CONSOLE                                                          \
-  (0 || NVR_PLATFORM_NX || NVR_PLATFORM_PS4 || NVR_PLATFORM_PS5 || NVR_PLATFORM_WINRT || \
-   NVR_PLATFORM_XBOXONE)
+#define NVR_PLATFORM_OS_CONSOLE                                    \
+  (0 || NVR_PLATFORM_NX || NVR_PLATFORM_PS4 || NVR_PLATFORM_PS5 || \
+   NVR_PLATFORM_WINRT || NVR_PLATFORM_XBOXONE)
 
 ///
-#define NVR_PLATFORM_OS_DESKTOP                                                              \
-  (0 || NVR_PLATFORM_BSD || NVR_PLATFORM_HAIKU || NVR_PLATFORM_HURD || NVR_PLATFORM_LINUX || \
-   NVR_PLATFORM_OSX || NVR_PLATFORM_WINDOWS)
+#define NVR_PLATFORM_OS_DESKTOP                                        \
+  (0 || NVR_PLATFORM_BSD || NVR_PLATFORM_HAIKU || NVR_PLATFORM_HURD || \
+   NVR_PLATFORM_LINUX || NVR_PLATFORM_OSX || NVR_PLATFORM_WINDOWS)
 
 ///
 #define NVR_PLATFORM_OS_EMBEDDED (0 || NVR_PLATFORM_RPI)
@@ -284,13 +293,13 @@
 
 ///
 #if NVR_COMPILER_GCC
-#define NVR_COMPILER_NAME                                                             \
-  "GCC " NVR_STRINGIZE(__GNUC__) "." NVR_STRINGIZE(__GNUC_MINOR__) "." NVR_STRINGIZE( \
-      __GNUC_PATCHLEVEL__)
+#define NVR_COMPILER_NAME                           \
+  "GCC " NVR_STRINGIZE(__GNUC__) "." NVR_STRINGIZE( \
+      __GNUC_MINOR__) "." NVR_STRINGIZE(__GNUC_PATCHLEVEL__)
 #elif NVR_COMPILER_CLANG
-#define NVR_COMPILER_NAME                                                                       \
-  "Clang " NVR_STRINGIZE(__clang_major__) "." NVR_STRINGIZE(__clang_minor__) "." NVR_STRINGIZE( \
-      __clang_patchlevel__)
+#define NVR_COMPILER_NAME                                    \
+  "Clang " NVR_STRINGIZE(__clang_major__) "." NVR_STRINGIZE( \
+      __clang_minor__) "." NVR_STRINGIZE(__clang_patchlevel__)
 #elif NVR_COMPILER_MSVC
 #if NVR_COMPILER_MSVC >= 1930  // Visual Studio 2022
 #define NVR_COMPILER_NAME "MSVC 17.0"
@@ -450,9 +459,11 @@ static_assert(false,
 #endif  // NVR_PLATFORM_*
 
 #if NVR_COMPILER_CLANG || NVR_COMPILER_GCC
-#define NVR_FN_EXPERIMENTAL [[gnu::warning("Experimental feature, subject to change")]]
+#define NVR_FN_EXPERIMENTAL \
+  [[gnu::warning("Experimental feature, subject to change")]]
 #elif NVR_COMPILER_MSVC && (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
-#define NVR_FN_EXPERIMENTAL __declspec(deprecated("Experimental feature, subject to change"))
+#define NVR_FN_EXPERIMENTAL \
+  __declspec(deprecated("Experimental feature, subject to change"))
 #else
 #define NVR_FN_EXPERIMENTAL
 #endif
@@ -470,6 +481,17 @@ static_assert(false,
 #else
 #define NVR_FN_WIP
 #endif
+
+// Class is noncopyable 
+#define NONCOPYABLE(className)                     \
+  className(const className&)            = delete; \
+  className& operator=(const className&) = delete
+
+// Move semantics still can be used, so a NONCOPYABLE class can
+// still be assigned by taking over the reference to the value.
+#define MOVABLE(className)                     \
+  className(className&&)            = default; \
+  className& operator=(className&&) = default
 
 #include <iostream>
 #include <type_traits>
