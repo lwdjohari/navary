@@ -27,20 +27,12 @@ NamespaceIndentation: None
 IndentAccessModifiers: false
 IndentCaseLabels: true
 
-# --- Includes ---
-IncludeBlocks: Regroup
-SortIncludes: true
-# Optional: nudge Vulkan headers into their own bucket if you like
-IncludeCategories:
-  - Regex: '^<vulkan/.*>'
-    Priority: 2
-    SortPriority: 2
-  - Regex: '^<.*>'
-    Priority: 3
-    SortPriority: 3
-  - Regex: '.*'
-    Priority: 4
-    SortPriority: 4
+# --- Includes (no reordering / regrouping) ---
+SortIncludes: false
+IncludeBlocks: Preserve
+# Optional: also disable "main header first"
+IncludeIsMainRegex: '^(?!)$'
+IncludeIsMainSourceRegex: '^(?!)$'
 
 # --- Spaces ---
 SpaceAfterCStyleCast: false
@@ -49,7 +41,7 @@ SpacesInParentheses: false
 SpaceBeforeParens: ControlStatements
 SpacesInAngles: false
 
-# --- Alignments (keep modest to avoid churn) ---
+# --- Alignments ---
 AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveDeclarations: None
 AlignTrailingComments: true
