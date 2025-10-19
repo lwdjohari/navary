@@ -41,6 +41,8 @@ set(NAVARY_ENGINE_SOURCES
 #       we keep a separate list just to use in install(FILES ...).
 set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/macro.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/size2.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/fixed.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/block.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena_allocator.h
