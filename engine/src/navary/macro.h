@@ -483,15 +483,17 @@ static_assert(false,
 #endif
 
 // Class is noncopyable 
-#define NONCOPYABLE(className)                     \
+#define NVR_NONCOPYABLE(className)                     \
   className(const className&)            = delete; \
   className& operator=(const className&) = delete
 
 // Move semantics still can be used, so a NONCOPYABLE class can
 // still be assigned by taking over the reference to the value.
-#define MOVABLE(className)                     \
+#define NVR_MOVABLE(className)                     \
   className(className&&)            = default; \
   className& operator=(className&&) = default
+
+#define NVR_ROUND_UP(n, multiple) (((n) + (multiple)-1) & ~((multiple)-1))
 
 #include <iostream>
 #include <type_traits>
