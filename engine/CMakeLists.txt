@@ -27,8 +27,12 @@ find_package(Threads REQUIRED)
 # 1) Sources: list them explicitly
 # -------------------------------
 set(NAVARY_ENGINE_SOURCES
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena_allocator.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.cc
+#    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena_allocator.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec2.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec3.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec4.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/rect.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.cc
 
 )
 

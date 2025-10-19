@@ -7,7 +7,10 @@ add_executable(navary-engine-test
   result_test.cc
   result_int_test.cc
   result_macro_test.cc
-
+  math/vec2_test.cc
+  math/vec3_test.cc
+  math/vec4_test.cc
+  math/rect_test.cc
 )
 
 # target_include_directories(block_tests PRIVATE
