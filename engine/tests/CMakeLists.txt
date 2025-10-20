@@ -22,6 +22,10 @@ add_executable(navary-engine-test
   math/quat_test.cc
   math/camera_proj_test.cc
   math/camera_proj_vulkan_test.cc
+  memory/arena_test.cc
+  memory/arena_complex_test.cc
+
+
 
 )
 
