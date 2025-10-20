@@ -61,6 +61,8 @@ set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/mat4.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/quat.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/span.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/block.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena_allocator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/platforms/platform.h
