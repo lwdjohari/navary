@@ -30,7 +30,7 @@ add_executable(navary-frustbb-test
   math/frustum_test.cc
   math/aabb_test.cc
   math/obb_test.cc
-
+  math/bounding_sphere_test.cc
 )
 
 # target_include_directories(block_tests PRIVATE
