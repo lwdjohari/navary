@@ -38,6 +38,9 @@ set(NAVARY_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/fixed_vec3.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/mat4.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/quat.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/frustum.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/aabb.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/obb.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.cc
 
 )
@@ -60,6 +63,9 @@ set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/fixed_vec3.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/mat4.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/quat.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/frustum.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/aabb.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/obb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/span.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena.h
