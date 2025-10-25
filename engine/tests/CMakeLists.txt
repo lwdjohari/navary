@@ -26,6 +26,13 @@ add_executable(navary-matquat-test
   math/camera_proj_vulkan_test.cc
 )
 
+add_executable(navary-frustbb-test
+  math/frustum_test.cc
+  math/aabb_test.cc
+  math/obb_test.cc
+
+)
+
 # target_include_directories(block_tests PRIVATE
 #   ${CMAKE_SOURCE_DIR}/include       # so "navary/memory/block.hpp" resolves
 # )
@@ -38,4 +45,7 @@ add_test(NAME navary-math-test COMMAND navary-math-test)
 
 target_link_libraries(navary-matquat-test PRIVATE Catch2::Catch2WithMain navary::engine)
 add_test(NAME navary-matquat-test COMMAND navary-matquat-test)
+
+target_link_libraries(navary-frustbb-test PRIVATE Catch2::Catch2WithMain navary::engine)
+add_test(NAME navary-frustbb-test COMMAND navary-frustbb-test)
 
