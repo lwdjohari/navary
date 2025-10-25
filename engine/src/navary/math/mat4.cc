@@ -1,3 +1,5 @@
+// navary/math/mat4.cc
+
 #include "navary/math/mat4.h"
 
 #include <algorithm>
@@ -87,33 +89,42 @@ Mat4 Mat4::Scaling(const Vec3& s) {
 Mat4 Mat4::RotationX(float angle) {
   const float c = std::cos(angle);
   const float s = std::sin(angle);
-  Mat4 r        = Identity();
-  r.set(1, 1, c);
-  r.set(2, 1, s);
-  r.set(1, 2, -s);
-  r.set(2, 2, c);
+  Mat4 r = Identity();
+  // Correct column fills for Rx:
+  // [ 1  0  0
+  //   0  c -s
+  //   0  s  c ]
+  r.set(1, 1,  c);  // col1,row1
+  r.set(1, 2,  s);  // col1,row2   (WAS -s)
+  r.set(2, 1, -s);  // col2,row1   (WAS +s)
+  r.set(2, 2,  c);  // col2,row2
   return r;
 }
 
 Mat4 Mat4::RotationY(float angle) {
   const float c = std::cos(angle);
   const float s = std::sin(angle);
-  Mat4 r        = Identity();
-  r.set(0, 0, c);
-  r.set(2, 0, -s);
-  r.set(0, 2, s);
-  r.set(2, 2, c);
+  Mat4 r = Identity();
+  // Correct column fills for Ry:
+  // [  c  0  s
+  //   0  1  0
+  //  -s  0  c ]
+  r.set(0, 0,  c);   // col0,row0
+  r.set(0, 2, -s);   // col0,row2   (WAS +s)
+  r.set(2, 0,  s);   // col2,row0   (WAS -s)
+  r.set(2, 2,  c);   // col2,row2
   return r;
 }
 
 Mat4 Mat4::RotationZ(float angle) {
   const float c = std::cos(angle);
   const float s = std::sin(angle);
-  Mat4 r        = Identity();
-  r.set(0, 0, c);
-  r.set(1, 0, s);
-  r.set(0, 1, -s);
-  r.set(1, 1, c);
+  Mat4 r = Identity();
+  // set(col, row, value)  — column-major, column-vectors
+  r.set(0, 0,  c);  // col0,row0
+  r.set(0, 1,  s);  // col0,row1   (WAS -s)
+  r.set(1, 0, -s);  // col1,row0   (WAS +s)
+  r.set(1, 1,  c);  // col1,row1
   return r;
 }
 
