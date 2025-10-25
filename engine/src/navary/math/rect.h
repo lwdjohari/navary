@@ -1,3 +1,5 @@
+// navary/math/rect.h
+
 #pragma once
 #include <array>
 #include <cstdint>

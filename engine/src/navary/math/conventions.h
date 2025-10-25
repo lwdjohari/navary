@@ -1,3 +1,4 @@
+// navary/math/conventions.h
 #pragma once
 
 namespace navary::math {

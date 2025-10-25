@@ -1,3 +1,5 @@
+// navary/math/fixed_trigonometry.h
+
 #pragma once
 #include "navary/math/fixed.h"
 #include "navary/math/math_util.h"  // kPi

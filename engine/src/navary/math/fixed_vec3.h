@@ -1,3 +1,5 @@
+// navary/math/fixed_vec3.h
+
 #pragma once
 
 #include "navary/math/fixed.h"  // Fixed15p16, Mul, Sqrt

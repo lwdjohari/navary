@@ -1,10 +1,12 @@
+// navary/math/plane.h
+
 #pragma once
 #include <cfloat>
 #include <cmath>
 
 #include "navary/math/vec4.h"
 #include "navary/math/vec3.h"  // Vec3, Vec4
-#include "navary/math/vec2.h"  // if you keep Vec2/Size2 in a separate header
+#include "navary/math/vec2.h"  
 
 namespace navary::math {
 

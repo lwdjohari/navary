@@ -1,3 +1,5 @@
+// navary/math/mat4.h
+
 #pragma once
 // Navary Engine - Math
 // 4x4 matrix (column-major, OpenGL-style) for graphics transforms.

@@ -1,3 +1,5 @@
+// navary/math/fixed_vec3.cc
+
 #include "navary/math/fixed_vec3.h"
 
 namespace navary::math {

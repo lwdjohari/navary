@@ -1,3 +1,5 @@
+// navary/math/vec2.cc
+
 #include "navary/math/vec2.h"
 #include <cmath>
 #include <cstdio>

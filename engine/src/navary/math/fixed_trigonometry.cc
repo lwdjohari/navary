@@ -1,3 +1,5 @@
+// navary/math/fixed_trigonometry.cc
+
 #include "navary/math/fixed_trigonometry.h"
 #include <algorithm>
 

@@ -1,3 +1,5 @@
+// navary/math/vec2.h
+
 #pragma once
 #include <cmath>
 #include <cstdio>

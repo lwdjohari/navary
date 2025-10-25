@@ -1,3 +1,5 @@
+// navary/math/rect.h
+
 #include "navary/math/rect.h"
 #include <algorithm>
 #include <cstdio>

@@ -1,3 +1,5 @@
+// navary/math/size2.h
+
 #pragma once
 #include <cstdint>
 

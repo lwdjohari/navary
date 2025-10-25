@@ -1,0 +1,1 @@
+// navary/math/fixed_vec2.cc
