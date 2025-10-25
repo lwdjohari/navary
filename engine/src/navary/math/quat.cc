@@ -1,3 +1,5 @@
+// navary/math/quat.cc
+
 #include "navary/math/quat.h"
 
 #include <cmath>
@@ -14,17 +16,17 @@ Quat Quat::FromAxisAngle(const Vec3& axis, float angle) {
 }
 
 Quat Quat::FromEulerXYZ(const Vec3& e) {
-  // R = Rx * Ry * Rz (XYZ intrinsic). Adjust if your engine prefers a different
-  // order.
-  const float cx = std::cos(e.x * 0.5f), sx = std::sin(e.x * 0.5f);
-  const float cy = std::cos(e.y * 0.5f), sy = std::sin(e.y * 0.5f);
-  const float cz = std::cos(e.z * 0.5f), sz = std::sin(e.z * 0.5f);
+  const float hx = 0.5f * e.x, hy = 0.5f * e.y, hz = 0.5f * e.z;
+  const float cx = std::cos(hx), sx = std::sin(hx);
+  const float cy = std::cos(hy), sy = std::sin(hy);
+  const float cz = std::cos(hz), sz = std::sin(hz);
 
-  // q = qx * qy * qz
-  Quat qx{sx, 0, 0, cx};
-  Quat qy{0, sy, 0, cy};
-  Quat qz{0, 0, sz, cz};
-  return (qx * qy * qz).Normalized();
+  const Quat qx{ sx, 0.f, 0.f, cx };
+  const Quat qy{ 0.f, sy, 0.f, cy };
+  const Quat qz{ 0.f, 0.f, sz, cz };
+
+  // Column-vectors: apply X, then Y, then Z  ⇒  R = Rz * Ry * Rx  ⇒  q = qz * qy * qx
+  return qz * (qy * qx);
 }
 
 Quat Quat::operator*(const Quat& r) const {
@@ -62,28 +64,24 @@ Vec3 Quat::Rotate(const Vec3& v) const {
 }
 
 Mat4 Quat::ToMat4() const {
-  const float xx = x * x * 2.0f;
-  const float yy = y * y * 2.0f;
-  const float zz = z * z * 2.0f;
-  const float xy = x * y * 2.0f;
-  const float xz = x * z * 2.0f;
-  const float yz = y * z * 2.0f;
-  const float wx = w * x * 2.0f;
-  const float wy = w * y * 2.0f;
-  const float wz = w * z * 2.0f;
+  const float xx = x * x, yy = y * y, zz = z * z;
+  const float xy = x * y, xz = x * z, yz = y * z;
+  const float wx = w * x, wy = w * y, wz = w * z;
 
-  Mat4 m = Mat4::Identity();
-  // Column-major fill, rotation only.
-  m(0, 0) = 1.0f - (yy + zz);
-  m(1, 0) = xy + wz;
-  m(2, 0) = xz - wy;
-  m(0, 1) = xy - wz;
-  m(1, 1) = 1.0f - (xx + zz);
-  m(2, 1) = yz + wx;
-  m(0, 2) = xz + wy;
-  m(1, 2) = yz - wx;
-  m(2, 2) = 1.0f - (xx + yy);
-  return m;
+  Mat4 r = Mat4::Identity();
+  // column 0
+  r.set(0, 0, 1.f - 2.f * (yy + zz));
+  r.set(0, 1, 2.f * (xy + wz));
+  r.set(0, 2, 2.f * (xz - wy));
+  // column 1
+  r.set(1, 0, 2.f * (xy - wz));
+  r.set(1, 1, 1.f - 2.f * (xx + zz));
+  r.set(1, 2, 2.f * (yz + wx));
+  // column 2
+  r.set(2, 0, 2.f * (xz + wy));
+  r.set(2, 1, 2.f * (yz - wx));
+  r.set(2, 2, 1.f - 2.f * (xx + yy));
+  return r;
 }
 
 Quat Quat::Slerp(const Quat& a, const Quat& b, float t) {
@@ -109,14 +107,26 @@ Quat Quat::Slerp(const Quat& a, const Quat& b, float t) {
   return out;
 }
 
+
 Quat Quat::Nlerp(const Quat& a, const Quat& b, float t) {
-  Quat b1 = b;
-  if (a.Dot(b) < 0.0f) {
-    b1 = Quat{-b.x, -b.y, -b.z, -b.w};
-  }
-  Quat out = a * (1.0f - t) + b1 * t;
-  out.Normalize();
-  return out;
+  // Prefer not to flip when dot is ~0 to avoid choosing the -90° arc in the 180° case.
+  // Use a tiny negative tolerance to prevent accidental flips from FP noise.
+  float dot = a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
+
+  const float hemi_tol = 1e-6f;  // tiny safety margin
+  Quat bb = (dot < -hemi_tol) ? Quat{-b.x, -b.y, -b.z, -b.w} : b;
+
+  Quat r{
+    a.x + t * (bb.x - a.x),
+    a.y + t * (bb.y - a.y),
+    a.z + t * (bb.z - a.z),
+    a.w + t * (bb.w - a.w)
+  };
+  // normalize
+  const float len = std::sqrt(r.x*r.x + r.y*r.y + r.z*r.z + r.w*r.w);
+  if (len > 0.f) { r.x/=len; r.y/=len; r.z/=len; r.w/=len; }
+  return r;
 }
+
 
 }  // namespace navary::math

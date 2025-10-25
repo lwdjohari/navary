@@ -1,3 +1,5 @@
+// navary/math/quat.h
+
 #pragma once
 // Navary Engine - Math
 // Clean-room unit quaternion (float) for rotations (graphics).
@@ -70,6 +72,9 @@ class Quat {
 
   // Normalized linear interpolation (fast, good for small angles).
   static Quat Nlerp(const Quat& a, const Quat& b, float ratio);
+
+  static inline Quat QMul(const Quat& a, const Quat& b) { return a * b; }
+
 };
 
 }  // namespace navary::math
