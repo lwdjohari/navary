@@ -49,8 +49,6 @@ TEST_CASE("Mat4: translation, scaling, rotation basics", "[mat4]") {
   REQUIRE_THAT(rx.x, WithinAbs(0.f, 1e-5f));
   REQUIRE_THAT(rx.y, WithinAbs(1.f, 1e-5f));
   REQUIRE_THAT(rx.z, WithinAbs(0.f, 1e-5f));
-
-  
 }
 
 TEST_CASE("Mat4: TRS composition order matches game-style build (T*Rz*Ry*Rx*S)",
@@ -159,7 +157,10 @@ TEST_CASE("Mat4 + Quat: consistency between Quat::ToMat4 and Mat4 rotations",
   Mat4 Rx = Mat4::RotationX(pitch);
   Mat4 Ry = Mat4::RotationY(yaw);
   Mat4 Rz = Mat4::RotationZ(roll);
-  Mat4 Re = Rx * Ry * Rz;  // note: must match the convention in FromEulerXYZ
+  // was:
+  // Mat4 Re = Rx * Ry * Rz;
+  // fix for column-vectors (apply X, then Y, then Z):
+  Mat4 Re = Rz * Ry * Rx;
 
   // Compare rotating a few basis vectors
   REQUIRE(V3Close(Rq.TransformVector({1, 0, 0}), Re.TransformVector({1, 0, 0}),
