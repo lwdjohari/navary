@@ -42,6 +42,7 @@ set(NAVARY_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/aabb.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/obb.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/bounding_sphere.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/spline.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.cc
 
 )
@@ -68,6 +69,7 @@ set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/obb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/bounding_sphere.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/spline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/span.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena.h
