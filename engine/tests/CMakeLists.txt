@@ -31,6 +31,10 @@ add_executable(navary-frustbb-test
   math/aabb_test.cc
   math/obb_test.cc
   math/bounding_sphere_test.cc
+  math/spline_rn_test.cc
+  math/spline_sn_test.cc
+  math/spline_tn_test.cc
+
 )
 
 # target_include_directories(block_tests PRIVATE
