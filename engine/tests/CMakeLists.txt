@@ -34,6 +34,9 @@ add_executable(navary-frustbb-test
   math/spline_rn_test.cc
   math/spline_sn_test.cc
   math/spline_tn_test.cc
+  math/spline_rn_fixed_test.cc
+  math/spline_sn_fixed_test.cc
+  math/spline_tn_fixed_test.cc
 
 )
 
