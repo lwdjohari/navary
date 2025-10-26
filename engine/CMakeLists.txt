@@ -70,6 +70,7 @@ set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/obb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/bounding_sphere.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/spline.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/spline_fixed.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/span.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena.h
