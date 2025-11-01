@@ -43,6 +43,16 @@ set(NAVARY_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/obb.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/bounding_sphere.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/spline.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/internal/platform_clock_win.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/internal/platform_clock_linux.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/internal/platform_clock_apple.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/internal/platform_clock_android.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/internal/platform_clock_fallback.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/monotonic_clock.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/tick_clock.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/timing_telemetry.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/soft_resync.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/frame_pacer.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.cc
 
 )
@@ -65,12 +75,24 @@ set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/fixed_vec3.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/mat4.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/quat.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/fixed_mat4.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/fixed_quat.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/frustum.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/obb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/bounding_sphere.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/spline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/spline_fixed.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/platform_clock_iface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/config.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/time_types.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/time_utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/monotonic_clock.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/tick_clock.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/timing_telemetry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/soft_resync.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/frame_pacer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/profiler_time.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/span.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena.h
