@@ -24,6 +24,8 @@ add_executable(navary-matquat-test
   math/quat_test.cc
   math/camera_proj_test.cc
   math/camera_proj_vulkan_test.cc
+  math/fixed_mat4_test.cc
+  math/fixed_quat_test.cc
 )
 
 add_executable(navary-frustbb-test
@@ -37,7 +39,16 @@ add_executable(navary-frustbb-test
   math/spline_rn_fixed_test.cc
   math/spline_sn_fixed_test.cc
   math/spline_tn_fixed_test.cc
+)
 
+add_executable(navary-time-test
+  time/time_utils_test.cc
+  time/tick_clock_test.cc
+  time/monotonic_clock_test.cc
+  time/soft_resync_test.cc
+  time/frame_pacer_test.cc
+  time/frame_pacer_mode_test.cc
+  time/profiler_time_test.cc
 )
 
 # target_include_directories(block_tests PRIVATE
@@ -55,4 +66,7 @@ add_test(NAME navary-matquat-test COMMAND navary-matquat-test)
 
 target_link_libraries(navary-frustbb-test PRIVATE Catch2::Catch2WithMain navary::engine)
 add_test(NAME navary-frustbb-test COMMAND navary-frustbb-test)
+
+target_link_libraries(navary-time-test PRIVATE Catch2::Catch2WithMain navary::engine)
+add_test(NAME navary-time-test COMMAND navary-time-test)
 
