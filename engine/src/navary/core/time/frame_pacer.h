@@ -45,6 +45,24 @@ class FramePacer {
  public:
   FramePacer() = default;
 
+  // Pacing mode. kUnlocked = no pacing. kCpuPaced = sleep/yield pacing.
+  // kVsyncExternal = assume display/GPU paces; we only observe timestamps.
+  enum class PacerMode : std::uint8_t {
+    kUnlocked = 0,
+    kCpuPaced,
+    kVsyncExternal
+  };
+
+  // Set pacing mode (default: kCpuPaced).
+  void SetMode(PacerMode m) {
+    mode_ = m;
+  }
+
+  // Get pacing mode
+  PacerMode mode() const {
+    return mode_;
+  }
+
   // Set target refresh rate in Hz. hz <= 0 disables pacing (unlocked).
   void SetTargetHz(double hz) {
     target_period_ns_ = HzToPeriodNs(hz);
@@ -78,7 +96,9 @@ class FramePacer {
   // End a frame, applying pacing as needed.
   // Returns total pacing time (ns) including sleeps and yields/spins performed.
   std::uint64_t EndFrame(std::uint64_t now_ns = 0) {
-    if (target_period_ns_ == 0) {
+    // If unlocked or vsync external, do not pace; just record end.
+    if (mode_ == PacerMode::kUnlocked || mode_ == PacerMode::kVsyncExternal ||
+        target_period_ns_ == 0) {
       // Unlocked; just advance last_end_ and return 0.
       last_end_ns_ = (now_ns != 0) ? now_ns : MonotonicNowNs();
       return 0ull;
@@ -134,31 +154,13 @@ class FramePacer {
   // Sleep helper (coarse). Best-effort, ignores failures (no exceptions).
   static void SleepNs(std::uint64_t ns);
 
-  // {
-  //   if (ns == 0)
-  //     return;
-  //   std::this_thread::sleep_for(DurationNs(ns));
-  // }
-
   // Yield/spin until |deadline_ns| or |budget_ns| consumed, whichever comes
   // first. Returns the observed time spent in this settle loop.
   static std::uint64_t SettleUntil(std::uint64_t deadline_ns,
                                    std::uint64_t budget_ns);
 
-  //                                  {
-  //   const std::uint64_t start = MonotonicNowNs();
-  //   std::uint64_t now         = start;
-  //   while (now < deadline_ns) {
-  //     if ((now - start) >= budget_ns)
-  //       break;
-  //     // Hint to scheduler to avoid burning a full core while settling.
-  //     std::this_thread::yield();
-  //     now = MonotonicNowNs();
-  //   }
-  //   return now - start;
-  // }
-
   // State
+  PacerMode mode_                 = PacerMode::kCpuPaced;
   std::uint64_t target_period_ns_ = HzToPeriodNs(60.0);  // default: 60 Hz
   std::uint64_t min_sleep_ns_     = MsToNs(2);           // conservative default
   std::uint64_t settle_window_ns_ = MsToNs(2);  // final small settle window
