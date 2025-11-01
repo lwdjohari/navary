@@ -377,6 +377,14 @@ class Fixed final {
   Rep raw_;
 };
 
+// Deterministic absolute value for Fixed
+template <typename Rep, int kFracBits>
+constexpr Fixed<Rep, kFracBits> FAbs(const Fixed<Rep, kFracBits>& v) noexcept {
+  return (v.Raw() < 0)
+             ? Fixed<Rep, kFracBits>::FromRaw(static_cast<Rep>(-v.Raw()))
+             : v;
+}
+
 // Common alias that mirrors 15.16 format from many engines
 using Fixed15p16 = Fixed<int32_t, 16>;
 
