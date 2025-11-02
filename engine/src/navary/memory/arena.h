@@ -51,6 +51,12 @@
 
 namespace navary::memory {
 
+// Bit layout for active_epochs_:
+// [31]  = FREEZE (1 = block new epoch entries)
+// [30:0]= active epoch count
+static constexpr uint32_t kFreezeBit = 0x80000000u;
+static constexpr uint32_t kCountMask = 0x7fffffffu;
+
 // -------------------------------
 // Upstream (block) allocator hook
 // -------------------------------
@@ -81,25 +87,20 @@ struct ArenaUpstream {
   void* user              = nullptr;
 
   static void* DefaultAlloc(std::size_t sz, std::size_t align, void*) {
-#if __cpp_aligned_new
-    // Standard C++17 aligned allocation (all major platforms)
-    return ::operator new(sz, std::align_val_t(align), std::nothrow);
-#elif defined(_WIN32)
-    // Windows fallback
+#if defined(_WIN32)
     return _aligned_malloc(sz, align);
 #else
-    // POSIX fallback
     void* p = nullptr;
+    // posix_memalign requires alignment to be a multiple of sizeof(void*)
+    if (align < sizeof(void*))
+      align = sizeof(void*);
     if (posix_memalign(&p, align, sz) != 0)
       return nullptr;
     return p;
 #endif
   }
   static void DefaultFree(void* p, std::size_t, void*) {
-#if __cpp_aligned_new
-    ::operator delete(p, std::align_val_t(alignof(std::max_align_t)),
-                      std::nothrow);
-#elif defined(_WIN32)
+#if defined(_WIN32)
     _aligned_free(p);
 #else
     free(p);
@@ -272,25 +273,18 @@ class Arena {
   void Reset() {
     AssertNoEpoch_();
     T_on_reset_begin_();
+
+    // Collect and run dtors outside the lock (see patch 4) then:
     RunAllDtors_();
+
+    // Do NOT free blocks; just reset all to begin for next frame.
     NAVARY_LOCK_GUARD(lk, mu_);
-    ArenaBlock* keep = head_;
-    size_t kept_size = 0;
-    if (keep) {
-      kept_size =
-          static_cast<size_t>(keep->end - keep->begin) + sizeof(ArenaBlock);
-      keep->cur   = keep->begin;
-      keep->dtors = nullptr;
+    for (ArenaBlock* b = head_; b; b = b->next) {
+      b->cur   = b->begin;
+      b->dtors = nullptr;
     }
-    ArenaBlock* b = keep ? keep->next : nullptr;
-    if (keep)
-      keep->next = nullptr;
-    while (b) {
-      ArenaBlock* nxt = b->next;
-      FreeBlock_(b);
-      b = nxt;
-    }
-    total_bytes_.store(keep ? kept_size : 0, std::memory_order_relaxed);
+
+    // Keep total_bytes_ unchanged (reserved capacity stays).
     T_on_reset_end_();
   }
 
@@ -326,7 +320,7 @@ class Arena {
   };
 
   bool IsIdle() const noexcept {
-    return active_epochs_.load(std::memory_order_acquire) == 0;
+    return (active_epochs_.load(std::memory_order_acquire) & kCountMask) == 0;
   }
 
   template <class Rep, class Period>
@@ -341,7 +335,8 @@ class Arena {
 
     // ---- Phase 1: spin (ns-level compare; no sleeps) ----
     for (uint32_t i = 0; i < opts_.wait_policy.spin_iters; ++i) {
-      const uint32_t c = active_epochs_.load(std::memory_order_acquire);
+      const uint32_t c =
+          active_epochs_.load(std::memory_order_acquire) & kCountMask;
       if (c == 0) {
         // Acquire fence is redundant with the acquire load above, but explicit.
         std::atomic_thread_fence(std::memory_order_acquire);
@@ -361,7 +356,8 @@ class Arena {
 
     // ---- Phase 2: yield (lets other threads run; effective µs–ms) ----
     for (uint32_t i = 0; i < opts_.wait_policy.yield_iters; ++i) {
-      const uint32_t c = active_epochs_.load(std::memory_order_acquire);
+      const uint32_t c =
+          active_epochs_.load(std::memory_order_acquire) & kCountMask;
       if (c == 0) {
         std::atomic_thread_fence(std::memory_order_acquire);
         T_on_wait_end_(false);
@@ -384,7 +380,8 @@ class Arena {
         std::max<uint32_t>(1, opts_.wait_policy.sleep_ms));
 
     while (steady_clock::now() < deadline) {
-      const uint32_t c = active_epochs_.load(std::memory_order_acquire);
+      const uint32_t c =
+          active_epochs_.load(std::memory_order_acquire) & kCountMask;
       if (c == 0) {
         std::atomic_thread_fence(std::memory_order_acquire);
         T_on_wait_end_(false);
@@ -409,13 +406,40 @@ class Arena {
 
   template <class Rep, class Period>
   bool ArenaResetSafely(std::chrono::duration<Rep, Period> timeout) {
-    if (WaitForEpochZero(timeout)) {
-      Reset();
+    // 1) Set FREEZE bit (preserve current count). Prevent new entrants.
+    uint32_t cur = active_epochs_.load(std::memory_order_relaxed);
+    for (;;) {
+      const uint32_t frozen = cur | kFreezeBit;
+      if (active_epochs_.compare_exchange_weak(cur, frozen,
+                                               std::memory_order_acq_rel,
+                                               std::memory_order_relaxed)) {
+        break;
+      }
+    }
+
+    // 2) Wait until count reaches zero (freeze prevents new entrants).
+    const bool ok = WaitForEpochZero(timeout);
+    if (ok) {
+      Reset();  // safe: no active epochs, and no new ones can start
+    }
+
+    // 3) Clear FREEZE bit (allow new entrants).
+    cur = active_epochs_.load(std::memory_order_relaxed);
+    for (;;) {
+      const uint32_t unfrozen = cur & kCountMask;
+      if (active_epochs_.compare_exchange_weak(cur, unfrozen,
+                                               std::memory_order_release,
+                                               std::memory_order_relaxed)) {
+        break;
+      }
+    }
+
+    if (ok) {
       return true;
     }
 #if NAVARY_ARENA_EPOCH_DEBUG
     // In debug, assert if epochs are still active after waiting
-    uint32_t c = active_epochs_.load(std::memory_order_acquire);
+    uint32_t c = active_epochs_.load(std::memory_order_acquire) & kCountMask;
     if (c != 0) {
       std::fprintf(stderr,
                    "[navary::memory::Arena] ArenaResetSafely: timeout with %u "
@@ -665,33 +689,60 @@ class Arena {
   }
 
   void RunAllDtors_() {
-    NAVARY_LOCK_GUARD(lk, mu_);
-    for (ArenaBlock* b = head_; b; b = b->next) {
-      auto* n = b->dtors;
+    // Collect all dtors under lock
+    std::vector<ArenaBlock::DtorNode*> lists;
+    {
+      NAVARY_LOCK_GUARD(lk, mu_);
+      for (ArenaBlock* b = head_; b; b = b->next) {
+        if (b->dtors) {
+          lists.push_back(b->dtors);
+          b->dtors = nullptr;
+        }
+      }
+    }
+    // Invoke outside the lock to avoid deadlocks/re-entrancy
+    for (auto* n : lists) {
       while (n) {
         auto* next = n->next;
         n->fn(n->arg);
         n = next;
       }
-      b->dtors = nullptr;
     }
   }
 
   // -------- epoch core --------
 
   friend class ArenaEpoch;
-  std::atomic<uint32_t> active_epochs_{0};
+  std::atomic<uint32_t> active_epochs_{0};  // [FREEZE|COUNT]
 
   void EnterEpoch_() noexcept {
-    active_epochs_.fetch_add(1, std::memory_order_acquire);
+    // Block while FREEZE is set; then increment count.
+    uint32_t cur = active_epochs_.load(std::memory_order_relaxed);
+    for (;;) {
+      // If frozen, wait (yield a bit to avoid hot spin) and re-read.
+      if (cur & kFreezeBit) {
+        std::this_thread::yield();
+        cur = active_epochs_.load(std::memory_order_relaxed);
+        continue;
+      }
+      const uint32_t next = cur + 1;  // count++ (freeze stays 0)
+      if (active_epochs_.compare_exchange_weak(cur, next,
+                                               std::memory_order_relaxed,
+                                               std::memory_order_relaxed)) {
+        break;
+      }
+      // cur reloaded by failed CAS; loop
+    }
   }
+
   void LeaveEpoch_() noexcept {
+    // Release to publish work before a waiter observes zero.
     active_epochs_.fetch_sub(1, std::memory_order_release);
   }
 
   void AssertNoEpoch_() const noexcept {
 #if NAVARY_ARENA_EPOCH_DEBUG
-    uint32_t c = active_epochs_.load(std::memory_order_acquire);
+    uint32_t c = active_epochs_.load(std::memory_order_acquire) & kCountMask;
     if (c != 0) {
       std::fprintf(
           stderr,
