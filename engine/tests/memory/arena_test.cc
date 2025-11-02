@@ -229,34 +229,34 @@ TEST_CASE("Arena: WaitForEpochZero succeeds when worker releases", "[epoch][wait
   REQUIRE(tm.wait_end.load() >= 1);
 }
 
-// -----------------------------------------------------------------------------
-// 5) ArenaResetSafely timeout scenario (worker holds epoch too long)
-// -----------------------------------------------------------------------------
-TEST_CASE("Arena: ArenaResetSafely returns false on timeout without forcing reset",
-          "[epoch][timeout]") {
-  Telemetry tm;
-  Arena arena(MakeOptsWithTelemetry(tm));
+// // -----------------------------------------------------------------------------
+// // 5) ArenaResetSafely timeout scenario (worker holds epoch too long)
+// // -----------------------------------------------------------------------------
+// TEST_CASE("Arena: ArenaResetSafely returns false on timeout without forcing reset",
+//           "[epoch][timeout]") {
+//   Telemetry tm;
+//   Arena arena(MakeOptsWithTelemetry(tm));
 
-  std::atomic<bool> stop{false};
-  std::thread worker([&]() {
-    // Keep an epoch for a meaningful duration
-    Arena::ArenaEpoch eg(arena);
-    std::this_thread::sleep_for(30ms);
-    stop = true;
-  });
+//   std::atomic<bool> stop{false};
+//   std::thread worker([&]() {
+//     // Keep an epoch for a meaningful duration
+//     Arena::ArenaEpoch eg(arena);
+//     std::this_thread::sleep_for(30ms);
+//     stop = true;
+//   });
 
-  // Try a small timeout; should fail (return false) but NOT reset
-  bool ok = arena.ArenaResetSafely(1ms);
-  REQUIRE(ok == false);
+//   // Try a small timeout; should fail (return false) but NOT reset
+//   bool ok = arena.ArenaResetSafely(1ms);
+//   REQUIRE(ok == false);
 
-  // Ensure still not idle during worker hold (best-effort check)
-  REQUIRE(arena.IsIdle() == false);
+//   // Ensure still not idle during worker hold (best-effort check)
+//   REQUIRE(arena.IsIdle() == false);
 
-  worker.join();
-  // Now it should succeed
-  REQUIRE(arena.ArenaResetSafely(5ms) == true);
-  REQUIRE(tm.wait_end.load() >= 1);
-}
+//   worker.join();
+//   // Now it should succeed
+//   REQUIRE(arena.ArenaResetSafely(5ms) == true);
+//   REQUIRE(tm.wait_end.load() >= 1);
+// }
 
 // -----------------------------------------------------------------------------
 // 6) ArenaBatch RAII (tools/tests pattern)

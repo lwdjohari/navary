@@ -51,22 +51,6 @@
 
 namespace navary::memory {
 
-// ---------- tiny Span for C++17 ----------
-// template <class T>
-// struct Span {
-//   T* data          = nullptr;
-//   std::size_t size = 0;
-//   T* begin() const {
-//     return data;
-//   }
-//   T* end() const {
-//     return data + size;
-//   }
-//   T& operator[](std::size_t i) const {
-//     return data[i];
-//   }
-// };
-
 // -------------------------------
 // Upstream (block) allocator hook
 // -------------------------------
@@ -113,7 +97,8 @@ struct ArenaUpstream {
   }
   static void DefaultFree(void* p, std::size_t, void*) {
 #if __cpp_aligned_new
-    ::operator delete(p, std::align_val_t(alignof(std::max_align_t)), std::nothrow);
+    ::operator delete(p, std::align_val_t(alignof(std::max_align_t)),
+                      std::nothrow);
 #elif defined(_WIN32)
     _aligned_free(p);
 #else
@@ -248,7 +233,7 @@ class Arena {
       lane.block = RefillLane_(size, alignment);
       if (!lane.block) {
         LeaveEpoch_();
-        return nullptr; // Allocation failed
+        return nullptr;  // Allocation failed
       }
       (void)TryBump_(lane.block, size, alignment);
     }
@@ -344,59 +329,6 @@ class Arena {
     return active_epochs_.load(std::memory_order_acquire) == 0;
   }
 
-  //   template <class Rep, class Period>
-  //   bool WaitForEpochZero(std::chrono::duration<Rep, Period> timeout) const {
-  //     using namespace std::chrono;
-  //     const auto deadline =
-  //         steady_clock::now() +
-  //         duration_cast<steady_clock::nanoseconds>(timeout);
-  //     T_on_wait_begin_();
-
-  //     // Spin
-  //     for (uint32_t i = 0; i < opts_.wait_policy.spin_iters; ++i) {
-  //       uint32_t c = active_epochs_.load(std::memory_order_acquire);
-  //       if (c == 0) {
-  //         T_on_wait_end_(false);
-  //         return true;
-  //       }
-  //       if ((i & 0xFFu) == 0)
-  //         T_on_wait_progress_(c);
-  //       if (steady_clock::now() >= deadline) {
-  //         T_on_wait_end_(true);
-  //         return false;
-  //       }
-  //     }
-  //     // Yield
-  //     for (uint32_t i = 0; i < opts_.wait_policy.yield_iters; ++i) {
-  //       uint32_t c = active_epochs_.load(std::memory_order_acquire);
-  //       if (c == 0) {
-  //         T_on_wait_end_(false);
-  //         return true;
-  //       }
-  //       if ((i & 0xFFu) == 0)
-  //         T_on_wait_progress_(c);
-  //       std::this_thread::yield();
-  //       if (steady_clock::now() >= deadline) {
-  //         T_on_wait_end_(true);
-  //         return false;
-  //       }
-  //     }
-  //     // Sleep
-  //     const auto sleep_dur =
-  //         std::chrono::microseconds(opts_.wait_policy.sleep_us);
-  //     while (steady_clock::now() < deadline) {
-  //       uint32_t c = active_epochs_.load(std::memory_order_acquire);
-  //       if (c == 0) {
-  //         T_on_wait_end_(false);
-  //         return true;
-  //       }
-  //       T_on_wait_progress_(c);
-  //       std::this_thread::sleep_for(sleep_dur);
-  //     }
-  //     T_on_wait_end_(true);
-  //     return false;
-  //   }
-
   template <class Rep, class Period>
   bool WaitForEpochZero(std::chrono::duration<Rep, Period> timeout) const {
     using namespace std::chrono;
@@ -409,12 +341,18 @@ class Arena {
 
     // ---- Phase 1: spin (ns-level compare; no sleeps) ----
     for (uint32_t i = 0; i < opts_.wait_policy.spin_iters; ++i) {
-      if (active_epochs_.load(std::memory_order_acquire) == 0) {
+      const uint32_t c = active_epochs_.load(std::memory_order_acquire);
+      if (c == 0) {
+        // Acquire fence is redundant with the acquire load above, but explicit.
+        std::atomic_thread_fence(std::memory_order_acquire);
         T_on_wait_end_(false);
         return true;
       }
-      if ((i & 0xFFu) == 0)
-        T_on_wait_progress_(active_epochs_.load(std::memory_order_relaxed));
+
+      if ((i & 0xFFu) == 0) {
+        T_on_wait_progress_(c);
+      }
+
       if (steady_clock::now() >= deadline) {
         T_on_wait_end_(true);
         return false;
@@ -423,12 +361,17 @@ class Arena {
 
     // ---- Phase 2: yield (lets other threads run; effective µs–ms) ----
     for (uint32_t i = 0; i < opts_.wait_policy.yield_iters; ++i) {
-      if (active_epochs_.load(std::memory_order_acquire) == 0) {
+      const uint32_t c = active_epochs_.load(std::memory_order_acquire);
+      if (c == 0) {
+        std::atomic_thread_fence(std::memory_order_acquire);
         T_on_wait_end_(false);
         return true;
       }
-      if ((i & 0xFFu) == 0)
-        T_on_wait_progress_(active_epochs_.load(std::memory_order_relaxed));
+
+      if ((i & 0xFFu) == 0) {
+        T_on_wait_progress_(c);
+      }
+
       std::this_thread::yield();
       if (steady_clock::now() >= deadline) {
         T_on_wait_end_(true);
@@ -441,11 +384,14 @@ class Arena {
         std::max<uint32_t>(1, opts_.wait_policy.sleep_ms));
 
     while (steady_clock::now() < deadline) {
-      if (active_epochs_.load(std::memory_order_acquire) == 0) {
+      const uint32_t c = active_epochs_.load(std::memory_order_acquire);
+      if (c == 0) {
+        std::atomic_thread_fence(std::memory_order_acquire);
         T_on_wait_end_(false);
         return true;
       }
-      T_on_wait_progress_(active_epochs_.load(std::memory_order_relaxed));
+
+      T_on_wait_progress_(c);
       std::this_thread::sleep_for(sleep_dur);
     }
 
@@ -471,9 +417,10 @@ class Arena {
     // In debug, assert if epochs are still active after waiting
     uint32_t c = active_epochs_.load(std::memory_order_acquire);
     if (c != 0) {
-      std::fprintf(
-          stderr,
-          "[navary::memory::Arena] ArenaResetSafely: timeout with %u active epoch(s)\n", c);
+      std::fprintf(stderr,
+                   "[navary::memory::Arena] ArenaResetSafely: timeout with %u "
+                   "active epoch(s)\n",
+                   c);
       std::fflush(stderr);
       std::abort();
     }
@@ -481,25 +428,6 @@ class Arena {
     // Timed out: do NOT reset; caller decides fallback.
     return false;
   }
-
-  // // Helper: waits then Reset(). returns true if reset performed.
-  // template <class Rep, class Period>
-  // bool ArenaResetSafely(std::chrono::duration<Rep, Period> timeout) {
-  //   // Always call wait telemetry for test/telemetry consistency.
-  //   T_on_wait_begin_();
-  //   uint32_t c = active_epochs_.load(std::memory_order_acquire);
-  //   if (c == 0) {
-  //     T_on_wait_end_(false);
-  //     Reset();
-  //     return true;
-  //   }
-  //   // Never abort here; just return false if epochs are held.
-  //   T_on_wait_progress_(c);
-  //   T_on_wait_end_(true);
-  //   return false;
-  //   // In release, you may want to use WaitForEpochZero as before.
-  //   // If you want to keep debug/release parity, remove the #if/#else.
-  // }
 
   // ---------- stats ----------
   std::size_t TotalReserved() const noexcept {
@@ -548,7 +476,8 @@ class Arena {
   static T* NewArray(Arena& a, std::size_t n) {
     static_assert(std::is_trivially_destructible_v<T>,
                   "Arena::NewArray only supports trivially destructible types. "
-                  "For non-trivial types, use Arena::MakeSpan to ensure correct destruction.");
+                  "For non-trivial types, use Arena::MakeSpan to ensure "
+                  "correct destruction.");
     static_assert(alignof(T) <= alignof(std::max_align_t),
                   "custom align not supported here");
     T* base = static_cast<T*>(a.Allocate(sizeof(T) * n, alignof(T)));
@@ -713,7 +642,7 @@ class Arena {
     block->next = head_;
     head_       = block;
     total_bytes_.fetch_add(want, std::memory_order_relaxed);
-    T_on_refill_(want); // Always call telemetry on every block allocation
+    T_on_refill_(want);  // Always call telemetry on every block allocation
     (void)TryBump_(block, 0, align);
     return block;
   }
