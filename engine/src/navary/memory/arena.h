@@ -1,19 +1,136 @@
-// ------------------------------------------------------------
-// navary::memory::Arena
-// ------------------------------------------------------------
-// A thread-safe, epoch-guarded arena allocator designed for
-// real-time and multithreaded use cases (e.g., game engines,
-// job systems, renderers).
-//
-// Key properties:
-//  - Linear allocation (bump-pointer) per block.
-//  - Concurrent allocations allowed via atomic bump.
-//  - Epoch guards track active threads.
-//  - Safe reset via WaitForEpochZero() + ArenaResetSafely().
-//  - Optional destructor registry and telemetry callbacks.
-// ------------------------------------------------------------
-
 #pragma once
+
+// ============================================================================
+// Navary Engine - Memory / Arena Allocator
+/// ----------------------------------------------------------------------------
+// File: navary/memory/arena.h
+// Author:
+// Linggawasistha Djohari              [2025-Present]
+//
+// Overview:
+//   High-performance, epoch-guarded linear allocator for real-time,
+//   multi-threaded systems (game engines, renderers, job systems, AI, etc.).
+//
+//   This allocator implements a *bump-pointer* model per thread lane,
+//   synchronized by epoch guards to ensure safe resets and predictable
+//   latency. It is deterministic, zero-fragmentation, and cross-platform
+//   (Windows, Linux, macOS, Android, iOS).  The allocator uses no RTTI,
+//   no exceptions, and adheres to Google C++ style conventions.
+//
+// ----------------------------------------------------------------------------
+// Design Goals:
+//   - O(1) bump-pointer allocation per thread.
+//   - Thread-safe: concurrent allocations with zero locks on hot path.
+//   - Deterministic reset using epoch guards.
+//   - Non-blocking WaitForEpochZero() with hybrid spin/yield/sleep policy.
+//   - Optional destructor registry for non-trivial types.
+//   - Configurable telemetry hooks (alloc refill, reset begin/end, etc.).
+//   - ArenaTLS isolation per (Arena*, thread) - no cross-arena contamination.
+//
+// ----------------------------------------------------------------------------
+// Arena + Thread-Local Lanes (isolated per Arena)
+//
+//   ┌────────────────────────────────────────────────────────────┐
+//   │                        navary::memory::Arena               │
+//   ├────────────────────────────────────────────────────────────┤
+//   │  - Head Block   → [ArenaBlock: memory range + dtors list]  │
+//   │  - Options      → alignment, telemetry, upstream allocator │
+//   │  - Epoch Guard  → active_epochs_ (atomic<uint32_t>)        │
+//   │  - Mutex        → protects refill + reset + purge paths    │
+//   └────────────────────────────────────────────────────────────┘
+//
+//   ┌────────────────────────────────────────────────────────────┐
+//   │        Thread-local (TLS) ArenaLane Registry               │
+//   ├────────────────────────────────────────────────────────────┤
+//   │ Each thread keeps exactly *one lane per Arena instance*:   │
+//   │                                                            │
+//   │   struct Slot {                                            │
+//   │     const Arena* owner;   // Which arena this lane belongs │
+//   │     ArenaLane lane;       // Active block + bump pointer   │
+//   │   };                                                       │
+//   │                                                            │
+//   │   static thread_local Slot slot;                           │
+//   │   if (slot.owner != this) {                                │
+//   │       // switched arenas; clear stale lane                 │
+//   │       slot.owner = this;                                   │
+//   │       slot.lane.block = nullptr;                           │
+//   │   }                                                        │
+//   │                                                            │
+//   └────────────────────────────────────────────────────────────┘
+//
+//   Each Arena therefore has its own thread-local allocation lane
+//   in each participating thread. Switching arenas automatically
+//   invalidates the cached lane to prevent stale pointers.
+//
+// ----------------------------------------------------------------------------
+// Arena + Thread-local Lanes (per Arena*, thread)
+//
+//   ┌───────────────────────────────────────────────────────┐
+//   │                    Arena (shared)                     │
+//   │ ┌───────────────┐  ┌───────────────┐  ┌──────────────┐│
+//   │ │ ArenaLane[T1] │  │ ArenaLane[T2] │  │ ArenaLane[T3]││
+//   │ └──────┬────────┘  └──────┬────────┘  └──────┬───────┘│
+//   │        │                  │                  │        │
+//   │     bump → [block mem]  bump → [block mem]  bump → .. │
+//   └───────────────────────────────────────────────────────┘
+//
+//   Per-thread lanes are keyed by (Arena*, thread). Switching to a
+//   different Arena on the same thread automatically clears the
+//   cached lane.block, ensuring no stale pointers after Reset/Purge.
+//
+// ----------------------------------------------------------------------------
+// Epoch Lifecycle & Safe Reset
+//
+//   [Thread 1]                  [Thread 2]                 [Arena]
+//       │                           │                        │
+//       │ ArenaEpoch e1(arena)      │                        │
+//       │ ─────────────────────────>│                        │
+//       │                           │ active_epochs_++       │
+//       │ Allocate() ...            │                        │
+//       │                           │                        │
+//       │ e1.~ArenaEpoch()          │                        │
+//       │ <──────────────────────── │                        │
+//       │                           │ active_epochs_--       │
+//       │                           │                        │
+//       │ ArenaResetSafely()        │                        │
+//       │ ──────────────────────────────────────────────────>│
+//       │                           │ WaitForEpochZero() → 0 │
+//       │                           │ Purge or Reset() OK    │
+//
+// ----------------------------------------------------------------------------
+// Thread Safety & Usage:
+//
+//   - Each thread uses its own ArenaLane (no locks on Allocate()).
+//   - Reset(), Purge(), and ArenaResetSafely() require *no active epochs*.
+//   - WaitForEpochZero() uses a hybrid spin → yield → sleep loop to avoid CPU
+//     starvation while waiting for other threads to exit their epochs.
+//   - Destructor registry ensures non-trivial types are correctly destroyed
+//     during Reset() or Purge().
+//
+// ----------------------------------------------------------------------------
+// Typical Usage:
+// ```cpp
+//     navary::memory::Arena frame_arena;
+//     {
+//         navary::memory::Arena::ArenaEpoch epoch(frame_arena);
+//         auto* tmp = frame_arena.New<MyTempStruct>(42);
+//         DoWork(tmp);
+//     } // epoch ends -> active_epochs_ decremented
+//
+//     frame_arena.ArenaResetSafely(std::chrono::milliseconds(2));
+// ```
+// ----------------------------------------------------------------------------
+// Safety Notes:
+//
+//   - After Reset() or Purge(), all pointers allocated from the Arena become
+//     invalid. Never retain Arena-allocated pointers across resets.
+//   - Each Arena instance owns its own TLS lane per thread. Allocations from
+//     different Arenas on the same thread are fully isolated.
+//   - No exceptions are thrown under any circumstance.
+//   - ArenaUpstream uses platform allocators (aligned malloc / posix_memalign)
+//     that are cross-platform and freeable with free() / _aligned_free().
+//
+// ----------------------------------------------------------------------------
 
 #include <atomic>
 #include <cstddef>
@@ -87,19 +204,26 @@ struct ArenaUpstream {
   void* user              = nullptr;
 
   static void* DefaultAlloc(std::size_t sz, std::size_t align, void*) {
+    // Require power-of-two and at least pointer-size alignment.
+    if ((align & (align - 1)) != 0 || align < alignof(void*))
+      return nullptr;
+
 #if defined(_WIN32)
+    // _aligned_malloc returns nullptr on failure.
     return _aligned_malloc(sz, align);
 #else
+    // posix_memalign returns 0 on success; memory is freed with free().
     void* p = nullptr;
-    // posix_memalign requires alignment to be a multiple of sizeof(void*)
-    if (align < sizeof(void*))
-      align = sizeof(void*);
-    if (posix_memalign(&p, align, sz) != 0)
+    int rc  = posix_memalign(&p, align, sz);
+    if (rc != 0)
       return nullptr;
     return p;
 #endif
   }
-  static void DefaultFree(void* p, std::size_t, void*) {
+
+  static void DefaultFree(void* p, std::size_t /*size*/, void*) {
+    if (!p)
+      return;
 #if defined(_WIN32)
     _aligned_free(p);
 #else
@@ -150,67 +274,57 @@ struct ArenaOptions {
   ArenaTelemetry telemetry{};
 };
 
-// ----------------------------------------
-// Thread-local lane (one block per thread)
-// ----------------------------------------
-
-struct ArenaLane {
-  ArenaBlock* block = nullptr;
-};
-
-// -----------------
-// Main Arena object
-// -----------------
-
-// class navary::memory::Arena
-//----------------------------------------------------------------------
-// A high-performance, epoch-guarded linear allocator for real-time
-// multithreaded systems such as game engines or render pipelines.
+// -----------------------------------------------------------------------------
+// Class: navary::memory::Arena
+// -----------------------------------------------------------------------------
+// A thread-safe, epoch-guarded linear allocator optimized for real-time
+// multi-threaded systems such as game engines, renderers, and job systems.
 //
-//  ▸ Design Goals
-//    - Deterministic allocation cost (O(1) bump-pointer).
-//    - Thread-safe concurrent Allocate() via atomic offset.
-//    - Safe Reset() across threads using epoch guards.
-//    - Optional destructor registry for non-POD objects.
-//    - Configurable spin / yield / sleep policy for WaitForEpochZero().
+// Each Arena provides deterministic O(1) allocations via per-thread bump
+// pointers, while supporting safe global resets using epoch guards.
 //
-//  ▸ Typical Usage
-//    ```cpp
-//    navary::memory::Arena frameArena(1 << 20);      // 1 MB
-//    {
-//        navary::memory::Arena::ArenaEpoch ep(frameArena);
-//        auto* tmp = frameArena.New<MyTempStruct>(42);
-//        DoWork(tmp);
-//    } // ep leaves scope → decrements active_epochs_
+// ----------------------------------------------------------------------------
+// Key Properties:
+//   - Lock-free allocations per thread (bump-pointer in ArenaLane).
+//   - Thread-safe across threads (atomic epoch counter guards reset).
+//   - Safe Reset() / Purge() using WaitForEpochZero().
+//   - Optional destructor registration for non-trivial types.
+//   - Hybrid spin/yield/sleep wait policy to avoid busy waits.
+//   - Telemetry callbacks for profiling and instrumentation.
+//   - Per-(Arena*, thread) TLS lane isolation - prevents cross-arena UAF.
 //
-//    frameArena.ArenaResetSafely(std::chrono::milliseconds(2));
-//    ```
+// ----------------------------------------------------------------------------
+// Arena + Thread-local Lanes (per Arena*, thread):
 //
-//  ▸ Threading Model
-//    Multiple threads may allocate concurrently.
-//    Reset() / Purge() must occur only after WaitForEpochZero()
-//    confirms no active epochs (i.e., no thread still allocating).
+//   Per-thread lanes are keyed by (Arena*, thread). Switching to a
+//   different Arena on the same thread automatically clears the
+//   cached lane.block, ensuring no stale pointers after Reset/Purge.
 //
-//  ▸ WaitForEpochZero()
-//    Three-phase hybrid precision wait:
-//      1. Spin phase — nanosecond-level compare (fast path).
-//      2. Yield phase — micro/millisecond granularity.
-//      3. Sleep phase — millisecond back-off to prevent busy-loop.
+// ----------------------------------------------------------------------------
+// Epoch Lifecycle:
 //
-//  ▸ Recommended Granularity
-//    Spin   → ns-µs  (short critical waits)
-//    Yield  → µs-ms  (short scheduler delays)
-//    Sleep  → ms     (long-tail safety)
+//   ArenaEpoch guard increments active_epochs_ on enter,
+//   decrements on exit.  Reset() and Purge() are allowed only
+//   when active_epochs_ == 0.
 //
-//  ▸ Ideal Use Cases
-//    - Per-frame or per-phase transient allocations.
-//    - Thread-local scratch buffers in job systems.
-//    - Frame allocator for Vulkan or DX12 renderers.
-//    - Temporary ECS / AI or culling data.
+// ----------------------------------------------------------------------------
+// Example:
+// ```cpp
+//     navary::memory::Arena frame_arena(1 << 20);  // 1 MB
+//     {
+//         navary::memory::Arena::ArenaEpoch epoch(frame_arena);
+//         auto* temp = frame_arena.New<MyStruct>(42);
+//         DoWork(temp);
+//     } // epoch leaves scope
 //
-//  ▸ Limitations
-//    - Pointers invalidated after Reset() or Purge().
-//    - Not a general heap (no free() / realloc()).
+//     frame_arena.ArenaResetSafely(std::chrono::milliseconds(2));
+// ```
+// ----------------------------------------------------------------------------
+// Thread Safety:
+//   - Concurrent Allocate() calls are lock-free.
+//   - Reset() and Purge() are serialized internally.
+//   - No exceptions, no RTTI, cross-platform safe.
+// ----------------------------------------------------------------------------
 class Arena {
  public:
   explicit Arena(const ArenaOptions& opts = ArenaOptions())
@@ -226,20 +340,45 @@ class Arena {
   // ---------- allocation ----------
   void* Allocate(std::size_t size,
                  std::size_t alignment = alignof(std::max_align_t)) {
-    if (alignment < opts_.alignment)
+    if (alignment < opts_.alignment) {
       alignment = opts_.alignment;
+    }
+
     EnterEpoch_();
-    ArenaLane& lane = GetLane_();
+
+    auto& lane = GetLane_(this);
+
+    // Validate cached block once in case a prior Purge() freed it.
+    if (lane.block) {
+      bool still_linked = false;
+      {
+        NAVARY_LOCK_GUARD(lk, mu_);
+        for (ArenaBlock* b = head_; b; b = b->next) {
+          if (b == lane.block) {
+            still_linked = true;
+            break;
+          }
+        }
+      }
+
+      if (!still_linked) {
+        lane.block = nullptr;
+      }
+    }
+
     if (!lane.block || !TryBump_(lane.block, size, alignment)) {
       lane.block = RefillLane_(size, alignment);
       if (!lane.block) {
         LeaveEpoch_();
         return nullptr;  // Allocation failed
       }
+
       (void)TryBump_(lane.block, size, alignment);
     }
+
     void* p = lane.block->cur - size;
     LeaveEpoch_();
+
     return p;
   }
 
@@ -253,18 +392,23 @@ class Arena {
 
   // Register arbitrary cleanup
   void Own(void* ptr, void (*deleter)(void*)) {
-    if (!ptr || !deleter)
+    if (!ptr || !deleter) {
       return;
-    ArenaLane& lane = GetLane_();
-    if (!lane.block)
+    }
+
+    auto& lane = GetLane_(this);
+    if (!lane.block) {
       lane.block = RefillLane_(sizeof(ArenaBlock::DtorNode),
                                alignof(ArenaBlock::DtorNode));
+    }
+
     auto* node_mem =
         Allocate(sizeof(ArenaBlock::DtorNode), alignof(ArenaBlock::DtorNode));
     auto* node =
         new (node_mem) ArenaBlock::DtorNode{deleter, ptr, lane.block->dtors};
     lane.block->dtors = node;
   }
+
   void OnReset(void (*fn)(void*), void* arg) {
     Own(arg, fn);
   }
@@ -309,9 +453,11 @@ class Arena {
     explicit ArenaEpoch(Arena& a) noexcept : arena_(&a) {
       arena_->EnterEpoch_();
     }
+
     ~ArenaEpoch() noexcept {
       arena_->LeaveEpoch_();
     }
+
     ArenaEpoch(const ArenaEpoch&)            = delete;
     ArenaEpoch& operator=(const ArenaEpoch&) = delete;
 
@@ -354,7 +500,7 @@ class Arena {
       }
     }
 
-    // ---- Phase 2: yield (lets other threads run; effective µs–ms) ----
+    // ---- Phase 2: yield (lets other threads run; effective µs-ms) ----
     for (uint32_t i = 0; i < opts_.wait_policy.yield_iters; ++i) {
       const uint32_t c =
           active_epochs_.load(std::memory_order_acquire) & kCountMask;
@@ -567,6 +713,7 @@ class Arena {
       auto* sp   = new (hdr2) SweepPtr{n, data};
       a.Own(sp, &SweepPtr::Run);
     }
+
     return {data, n};
   }
 
@@ -575,65 +722,19 @@ class Arena {
   // TLS lane storage
   // ----------------
 
-  //----------------------------------------------------------------------
-  // GetLane_()
-  //----------------------------------------------------------------------
-  // Returns a reference to the thread-local ArenaLane instance for the
-  // calling thread.
-  //
-  // About ArenaLane:
-  //   Each thread that allocates from an Arena uses its own *ArenaLane* —
-  //   a lightweight structure that tracks allocation state (bump pointer,
-  //   active block pointer, statistics, etc.).  ArenaLanes isolate each
-  //   thread’s bump allocation so no locking or atomic arithmetic is
-  //   needed for concurrent Allocate() calls.
-  //
-  //   Conceptually:
-  //
-  //        ┌───────────────────────────────────────────────────────┐
-  //        │                navary::memory::Arena                  │
-  //        ├───────────────────────────────────────────────────────┤
-  //        │  [Thread 1] ArenaLane ─► bump ptr → [block memory]    │
-  //        │  [Thread 2] ArenaLane ─► bump ptr → [block memory]    │
-  //        │  [Thread 3] ArenaLane ─► bump ptr → [block memory]    │
-  //        └───────────────────────────────────────────────────────┘
-  //                    (one ArenaLane per thread)
-  //
-  //   Each lane operates independently but allocates from the same arena
-  //   pool, guaranteeing deterministic and lock-free performance.
-  //
-  // Implementation details:
-  //   • Uses a *function-local static thread_local* variable.
-  //   • This prevents *ODR (One Definition Rule)* violations that occur
-  //     when multiple translation units or *DSOs (Dynamic Shared Objects)*
-  //     define the same global TLS (Thread-Local Storage) symbol.
-  //   • Because the variable is defined inside the function, no global
-  //     symbol is emitted — safe for header-only usage and across DSOs.
-  //
-  // Expected behavior:
-  //   • Each thread lazily constructs its own ArenaLane on first access.
-  //   • Lifetime is tied to the thread — destroyed automatically on exit.
-  //   • Works on all major C++20 platforms (Linux, macOS, iOS, Android).
-  //   • No initialization-order issues; creation is deterministic.
-  //
-  // Performance:
-  //   • Access cost ≈ TLS lookup.
-  //   • Initialization once per thread.
-  //   • Lock-free allocations within each lane.
-  //
-  // Example usage:
-  //   auto& lane = GetLane_();
-  //   void* mem  = lane.allocate(*this, bytes, align);
-  //
-  static ArenaLane& GetLane_() noexcept {
-    static thread_local ArenaLane lane{};
-    return lane;
-  }
+  struct ArenaLaneTLS {
+    const Arena* owner = nullptr;
+    ArenaBlock* block  = nullptr;
+  };
 
-  //   static thread_local ArenaLane tls_lane_;
-  //   ArenaLane& GetLane_() noexcept {
-  //     return tls_lane_;
-  //   }
+  static ArenaLaneTLS& GetLane_(const Arena* self) noexcept {
+    static thread_local ArenaLaneTLS tls{};
+    if (tls.owner != self) {
+      tls.owner = self;
+      tls.block = nullptr;  // prevent cross-arena contamination
+    }
+    return tls;
+  }
 
   // -------------
   // Slow paths
@@ -657,10 +758,12 @@ class Arena {
     std::size_t want = NextBlockSize_(need, align);
     auto* raw        = static_cast<std::byte*>(
         opts_.upstream.allocate(want, opts_.alignment, opts_.upstream.user));
+
     if (!raw) {
       // Allocation failed: return nullptr, caller must handle
       return nullptr;
     }
+
     auto* block = new (raw)
         ArenaBlock(raw + sizeof(ArenaBlock), want - sizeof(ArenaBlock));
     block->next = head_;
@@ -668,16 +771,21 @@ class Arena {
     total_bytes_.fetch_add(want, std::memory_order_relaxed);
     T_on_refill_(want);  // Always call telemetry on every block allocation
     (void)TryBump_(block, 0, align);
+
     return block;
   }
 
   std::size_t NextBlockSize_(std::size_t need, std::size_t align) const {
     std::size_t body       = opts_.initial_block_bytes;
     std::size_t min_needed = need + align + sizeof(ArenaBlock);
-    if (min_needed > body)
+    if (min_needed > body) {
       body = min_needed;
-    if (body > opts_.max_block_bytes)
+    }
+
+    if (body > opts_.max_block_bytes) {
       body = opts_.max_block_bytes;
+    }
+
     return body;
   }
 
@@ -756,28 +864,39 @@ class Arena {
   // ---- telemetry helpers ----
 
   void T_on_refill_(std::size_t b) const {
-    if (opts_.telemetry.on_alloc_refill)
+    if (opts_.telemetry.on_alloc_refill) {
       opts_.telemetry.on_alloc_refill(this, b, opts_.telemetry.user);
+    }
   }
+
   void T_on_reset_begin_() const {
-    if (opts_.telemetry.on_reset_begin)
+    if (opts_.telemetry.on_reset_begin){
       opts_.telemetry.on_reset_begin(this, opts_.telemetry.user);
+    }
   }
+
   void T_on_reset_end_() const {
-    if (opts_.telemetry.on_reset_end)
+    if (opts_.telemetry.on_reset_end){
       opts_.telemetry.on_reset_end(this, opts_.telemetry.user);
+    }
   }
+
   void T_on_wait_begin_() const {
-    if (opts_.telemetry.on_wait_begin)
+    if (opts_.telemetry.on_wait_begin){
       opts_.telemetry.on_wait_begin(this, opts_.telemetry.user);
+    }
   }
+
   void T_on_wait_progress_(uint32_t active) const {
-    if (opts_.telemetry.on_wait_progress)
+    if (opts_.telemetry.on_wait_progress){
       opts_.telemetry.on_wait_progress(this, active, opts_.telemetry.user);
+    }
   }
+
   void T_on_wait_end_(bool timeout) const {
-    if (opts_.telemetry.on_wait_end)
+    if (opts_.telemetry.on_wait_end){
       opts_.telemetry.on_wait_end(this, timeout, opts_.telemetry.user);
+    }
   }
 
   template <class T>
