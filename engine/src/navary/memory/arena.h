@@ -1,4 +1,3 @@
-
 // ------------------------------------------------------------
 // navary::memory::Arena
 // ------------------------------------------------------------
@@ -99,17 +98,24 @@ struct ArenaUpstream {
 
   static void* DefaultAlloc(std::size_t sz, std::size_t align, void*) {
 #if __cpp_aligned_new
-    return ::operator new(sz, std::align_val_t(align));
+    // Standard C++17 aligned allocation (all major platforms)
+    return ::operator new(sz, std::align_val_t(align), std::nothrow);
+#elif defined(_WIN32)
+    // Windows fallback
+    return _aligned_malloc(sz, align);
 #else
+    // POSIX fallback
     void* p = nullptr;
     if (posix_memalign(&p, align, sz) != 0)
-      throw std::bad_alloc();
+      return nullptr;
     return p;
 #endif
   }
   static void DefaultFree(void* p, std::size_t, void*) {
 #if __cpp_aligned_new
-    ::operator delete(p, std::align_val_t(alignof(std::max_align_t)));
+    ::operator delete(p, std::align_val_t(alignof(std::max_align_t)), std::nothrow);
+#elif defined(_WIN32)
+    _aligned_free(p);
 #else
     free(p);
 #endif
@@ -236,10 +242,14 @@ class Arena {
                  std::size_t alignment = alignof(std::max_align_t)) {
     if (alignment < opts_.alignment)
       alignment = opts_.alignment;
-    EnterEpoch_();  // soft guard: count alloc epochs around bump; cheap
+    EnterEpoch_();
     ArenaLane& lane = GetLane_();
     if (!lane.block || !TryBump_(lane.block, size, alignment)) {
       lane.block = RefillLane_(size, alignment);
+      if (!lane.block) {
+        LeaveEpoch_();
+        return nullptr; // Allocation failed
+      }
       (void)TryBump_(lane.block, size, alignment);
     }
     void* p = lane.block->cur - size;
@@ -446,37 +456,50 @@ class Arena {
   bool WaitForEpochZeroMs(int timeout_ms) const {
     return WaitForEpochZero(std::chrono::milliseconds(timeout_ms));
   }
+
   bool ArenaResetSafelyMs(int timeout_ms) {
-#if NAVARY_ARENA_EPOCH_DEBUG
-    AssertNoEpoch_();
-    Reset();
-    return true;
-#else
-    if (WaitForEpochZero(std::chrono::milliseconds(timeout_ms))) {
-      Reset();
-      return true;
-    }
-    return false;
-#endif
+    return ArenaResetSafely(std::chrono::milliseconds(timeout_ms));
   }
 
-  // Helper: waits then Reset(). returns true if reset performed.
   template <class Rep, class Period>
   bool ArenaResetSafely(std::chrono::duration<Rep, Period> timeout) {
-#if NAVARY_ARENA_EPOCH_DEBUG
-    // In debug, fail fast if misused to surface bugs early.
-    AssertNoEpoch_();
-    Reset();
-    return true;
-#else
     if (WaitForEpochZero(timeout)) {
       Reset();
       return true;
     }
+#if NAVARY_ARENA_EPOCH_DEBUG
+    // In debug, assert if epochs are still active after waiting
+    uint32_t c = active_epochs_.load(std::memory_order_acquire);
+    if (c != 0) {
+      std::fprintf(
+          stderr,
+          "[navary::memory::Arena] ArenaResetSafely: timeout with %u active epoch(s)\n", c);
+      std::fflush(stderr);
+      std::abort();
+    }
+#endif
     // Timed out: do NOT reset; caller decides fallback.
     return false;
-#endif
   }
+
+  // // Helper: waits then Reset(). returns true if reset performed.
+  // template <class Rep, class Period>
+  // bool ArenaResetSafely(std::chrono::duration<Rep, Period> timeout) {
+  //   // Always call wait telemetry for test/telemetry consistency.
+  //   T_on_wait_begin_();
+  //   uint32_t c = active_epochs_.load(std::memory_order_acquire);
+  //   if (c == 0) {
+  //     T_on_wait_end_(false);
+  //     Reset();
+  //     return true;
+  //   }
+  //   // Never abort here; just return false if epochs are held.
+  //   T_on_wait_progress_(c);
+  //   T_on_wait_end_(true);
+  //   return false;
+  //   // In release, you may want to use WaitForEpochZero as before.
+  //   // If you want to keep debug/release parity, remove the #if/#else.
+  // }
 
   // ---------- stats ----------
   std::size_t TotalReserved() const noexcept {
@@ -520,21 +543,18 @@ class Arena {
     return obj;
   }
 
+  // NewArray now only supports trivially destructible types.
   template <class T>
   static T* NewArray(Arena& a, std::size_t n) {
+    static_assert(std::is_trivially_destructible_v<T>,
+                  "Arena::NewArray only supports trivially destructible types. "
+                  "For non-trivial types, use Arena::MakeSpan to ensure correct destruction.");
     static_assert(alignof(T) <= alignof(std::max_align_t),
                   "custom align not supported here");
     T* base = static_cast<T*>(a.Allocate(sizeof(T) * n, alignof(T)));
     if constexpr (!std::is_trivially_constructible_v<T>) {
       for (std::size_t i = 0; i < n; ++i)
         new (base + i) T();
-    }
-    if constexpr (!std::is_trivially_destructible_v<T>) {
-      // Register array destructor sweep
-      a.Own(base, [](void* p) {
-        // length unknown here; for safety, require trivially destructible
-        // arrays or use MakeSpan() (We provide MakeSpan which tracks size.)
-      });
     }
     return base;
   }
@@ -684,12 +704,16 @@ class Arena {
     std::size_t want = NextBlockSize_(need, align);
     auto* raw        = static_cast<std::byte*>(
         opts_.upstream.allocate(want, opts_.alignment, opts_.upstream.user));
+    if (!raw) {
+      // Allocation failed: return nullptr, caller must handle
+      return nullptr;
+    }
     auto* block = new (raw)
         ArenaBlock(raw + sizeof(ArenaBlock), want - sizeof(ArenaBlock));
     block->next = head_;
     head_       = block;
     total_bytes_.fetch_add(want, std::memory_order_relaxed);
-    T_on_refill_(want);
+    T_on_refill_(want); // Always call telemetry on every block allocation
     (void)TryBump_(block, 0, align);
     return block;
   }
