@@ -59,9 +59,9 @@ NavaryRC TextureManager::Init(std::uint32_t max_textures) {
                     "TextureManager: dummy textures allocation failed");
   }
 
-  dummy_textures_.white       = white.value;
-  dummy_textures_.black       = black.value;
-  dummy_textures_.flat_normal = flat.value;
+  dummy_textures_.white       = white.value();
+  dummy_textures_.black       = black.value();
+  dummy_textures_.flat_normal = flat.value();
 
   return NavaryRC::OK();
 }
