@@ -53,6 +53,7 @@ set(NAVARY_ENGINE_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/timing_telemetry.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/soft_resync.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/time/frame_pacer.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/scheduler/job_system.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.cc
 
 )
@@ -62,6 +63,8 @@ set(NAVARY_ENGINE_SOURCES
 #       we keep a separate list just to use in install(FILES ...).
 set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/macro.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/navary_status.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/size2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/math/vec3.h
@@ -96,13 +99,20 @@ set(NAVARY_PUBLIC_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/utility/random.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/span.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/memory/arena.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/scheduler/job_system.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/loop/main_loop.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/loop/frame_budget.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/core/loop/frame_profiler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/platforms/platform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/render_backend.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/renderer/vulkan_render_backend.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/navary/navary.h
 )
 
-
+nvr_defs_init(${PROJECT_NAME})
+if(NVR_JOBS_ENABLE_TRACE)
+    nvr_defs_add(${PROJECT_NAME} NVR_JOBS_ENABLE_TRACE=1)
+endif()
 
 add_library(${PROJECT_NAME} STATIC ${NAVARY_ENGINE_SOURCES})
 target_link_libraries(${PROJECT_NAME}  
@@ -118,9 +128,10 @@ target_link_libraries(${PROJECT_NAME}
         # imgui
         # fastgltf
         entt::entt
+        enkiTS
     )
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-target_compile_definitions(${PROJECT_NAME} PUBLIC "NAVARI_USE_LIBUV=0")
+nvr_defs_apply(${PROJECT_NAME} ${PROJECT_NAME} PUBLIC)
 target_compile_features(${PROJECT_NAME} PUBLIC ${CXX_FEATURE})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
@@ -141,3 +152,6 @@ if(NAVARY_ENGINE_BUILD_TEST)
      message(STATUS "Navary Engine tests enabled (NAVARY_ENGINE_BUILD_TEST=ON)")
     add_subdirectory(tests build-engine-tests)
 endif()
+
+message(STATUS "")
+nvr_dump_target(${PROJECT_NAME} BUCKET ${PROJECT_NAME})
