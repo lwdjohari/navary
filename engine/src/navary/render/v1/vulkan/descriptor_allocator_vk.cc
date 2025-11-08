@@ -57,8 +57,8 @@ NavaryResult<core::DescriptorHandle> DescriptorAllocatorVk::Allocate(
   VkResult res = vkAllocateDescriptorSets(resources_.device, &info, &vk_set);
   if (res != VK_SUCCESS) {
     return NavaryResult<core::DescriptorHandle>(
-        NavaryStatus(NavaryStatus::kInternal,
-                     "DescriptorAllocatorVk: vkAllocateDescriptorSets failed"));
+        NavaryRC(NavaryStatus::kInternal,
+                 "DescriptorAllocatorVk: vkAllocateDescriptorSets failed"));
   }
 
   const std::uint32_t index = count_++;
