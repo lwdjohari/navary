@@ -65,3 +65,7 @@
 	path = thirdparty/imgui
 	url = https://github.com/ocornut/imgui
 	shallow = true
+[submodule "thirdparty/vk-bootstrap"]
+	path = thirdparty/vk-bootstrap
+	url = https://github.com/charles-lunarg/vk-bootstrap
+	shallow = true
