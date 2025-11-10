@@ -70,3 +70,7 @@
 	path = thirdparty/imgui-node-editor
 	url = https://github.com/thedmd/imgui-node-editor.git
 	shallow = true
+[submodule "thirdparty/vk-bootstrap"]
+	path = thirdparty/vk-bootstrap
+	url = https://github.com/charles-lunarg/vk-bootstrap
+	shallow = true
