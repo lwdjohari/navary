@@ -70,3 +70,7 @@
 	path = thirdparty/vma
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
 	shallow = true
+[submodule "thirdparty/imgui-node-editor"]
+	path = thirdparty/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor.git
+	shallow = true
