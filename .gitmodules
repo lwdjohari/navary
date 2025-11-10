@@ -72,3 +72,7 @@
 	path = thirdparty/enkits
 	url = https://github.com/dougbinks/enkiTS.git
 	shallow = true
+[submodule "thirdparty/sdl3"]
+	path = thirdparty/sdl3
+	url = https://github.com/libsdl-org/SDL.git
+	shallow = true
