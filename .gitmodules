@@ -46,9 +46,6 @@
 [submodule "thirdparty/fastgltf"]
 	path = thirdparty/fastgltf
 	url = https://github.com/spnda/fastgltf.git
-[submodule "thirdparty/vma"]
-	path = thirdparty/vma
-	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
 [submodule "thirdparty/fmt"]
 	path = thirdparty/fmt
 	url = https://github.com/fmtlib/fmt.git
