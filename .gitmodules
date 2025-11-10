@@ -61,3 +61,7 @@
 	path = thirdparty/sdl3
 	url = https://github.com/libsdl-org/SDL.git
 	shallow = true
+[submodule "thirdparty/imgui"]
+	path = thirdparty/imgui
+	url = https://github.com/ocornut/imgui
+	shallow = true
